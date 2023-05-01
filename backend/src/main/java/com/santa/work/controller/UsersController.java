@@ -53,9 +53,12 @@ public class UsersController {
 
     //DTO
 
+    /*
     @GetMapping("/{userId}/groups")
     public ResponseEntity<List<SecretSantaGroupDTO>> getAllSecretSantaGroupsByUserId(@PathVariable("userId") UUID userId) {
         List<SecretSantaGroupDTO> secretSantaGroupDTOs = secretSantaService.findAllSecretSantaGroupsByUserId(userId);
         return new ResponseEntity<>(secretSantaGroupDTOs, HttpStatus.OK);
     }
+    */
+
 }

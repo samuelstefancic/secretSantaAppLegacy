@@ -3,13 +3,13 @@ package com.santa.work.controller;
 import com.santa.work.entity.Match;
 import com.santa.work.entity.Users;
 import com.santa.work.service.match.MatchServiceImpl;
-import com.santa.work.service.secretSantaGroup.SecretSantaGroupServiceImpl;
 import com.santa.work.service.user.UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,11 +24,13 @@ import java.util.UUID;
 public class MatchController {
 
     private final MatchServiceImpl matchService;
-    private final SecretSantaGroupServiceImpl secretSantaGroupService;
-    private final  UserServiceImpl userService;
-    @Autowired
-    public MatchController(MatchServiceImpl matchService, SecretSantaGroupServiceImpl secretSantaGroupService, UserServiceImpl userService) {this.matchService = matchService; this.secretSantaGroupService = secretSantaGroupService; this.userService = userService;}
+    private final UserServiceImpl userService;
 
+    @Autowired
+    public MatchController(@Lazy MatchServiceImpl matchService, UserServiceImpl userService) {
+        this.matchService = matchService;
+        this.userService = userService;
+    }
     @Operation(summary = "Basic post method, create a match")
     @PostMapping
     public ResponseEntity<Match> createMatch(@Valid @RequestBody Match match) {

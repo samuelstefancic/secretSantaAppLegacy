@@ -17,5 +17,5 @@ public interface SecretSantaGroupService {
 
     //DTO
 
-    List<SecretSantaGroupDTO> findAllSecretSantaGroupsByUserId(UUID userId);
+   // List<SecretSantaGroupDTO> findAllSecretSantaGroupsByUserId(UUID userId);
 }

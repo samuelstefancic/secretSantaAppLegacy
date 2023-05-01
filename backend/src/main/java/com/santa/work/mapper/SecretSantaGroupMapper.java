@@ -9,6 +9,7 @@ import com.santa.work.service.invitation.InvitationServiceImpl;
 import com.santa.work.service.match.MatchServiceImpl;
 import com.santa.work.service.secretSantaGroup.SecretSantaGroupServiceImpl;
 import com.santa.work.service.user.UserServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -17,13 +18,18 @@ import java.util.stream.Collectors;
 @Component
 public class SecretSantaGroupMapper {
 
+    @Autowired
     private final UserMapperDelegate userMapper;
+    @Autowired
     private final UserServiceImpl userService;
+    @Autowired
     private final InvitationServiceImpl invitationService;
+    @Autowired
     private final MatchServiceImpl matchService;
+    @Autowired
     private final SecretSantaGroupServiceImpl secretService;
-
-    public SecretSantaGroupMapper(@Lazy UserMapperDelegate userMapper, UserServiceImpl userService, InvitationServiceImpl invitationService, MatchServiceImpl matchService, SecretSantaGroupServiceImpl secretService) {
+@Autowired
+    public SecretSantaGroupMapper(@Lazy UserMapperDelegate userMapper, UserServiceImpl userService, InvitationServiceImpl invitationService, MatchServiceImpl matchService,@Lazy SecretSantaGroupServiceImpl secretService) {
         this.userMapper = userMapper;
         this.userService = userService;
         this.invitationService = invitationService;
@@ -60,6 +66,7 @@ public class SecretSantaGroupMapper {
         List<Match> matches = matchService.findMatchesByIds(groupDTO.getMatchIds());
         return new SecretSantaGroup(id, name, admin, url, matchesGenerated, members, invitations, matches);
     }
+
     public List<SecretSantaGroup> toSecretSantaGroupEntities(List<UUID> groupIds, UUID adminId) {
         if (groupIds == null || groupIds.isEmpty()) {
             return Collections.emptyList();
@@ -72,6 +79,7 @@ public class SecretSantaGroupMapper {
         }
         return groups;
     }
+
     public List<UUID> toUUIDs(List<SecretSantaGroup> groups) {
         if (groups == null) {
             return Collections.emptyList();

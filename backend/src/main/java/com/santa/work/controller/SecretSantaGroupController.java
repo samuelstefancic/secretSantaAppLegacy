@@ -7,6 +7,7 @@ import com.santa.work.service.user.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class SecretSantaGroupController {
     private final UserServiceImpl userService;
 
     @Autowired
-    public SecretSantaGroupController(SecretSantaGroupServiceImpl secretSantaGroupService, UserServiceImpl userService) {
+    public SecretSantaGroupController(@Lazy SecretSantaGroupServiceImpl secretSantaGroupService, UserServiceImpl userService) {
         this.secretSantaGroupService = secretSantaGroupService;
         this.userService = userService;
     }
