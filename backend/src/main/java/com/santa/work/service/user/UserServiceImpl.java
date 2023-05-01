@@ -44,6 +44,8 @@ public class UserServiceImpl implements UserService{
         }
     }
 
+    //Find
+
     public UserDTO findUserByIdWithDTO(UUID userId) {
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsersException("User with id " + userId + " not found", HttpStatus.NOT_FOUND));
@@ -70,6 +72,8 @@ public class UserServiceImpl implements UserService{
         }
         return userRepository.findAllById(usersIds);
     }
+
+    //Update
     public UserDTO updateUserWithDTO(UUID id, UserDTO updatedUserDTO) {
         Users updatedUser = userMapper.toUserEntity(updatedUserDTO);
         Users user = userRepository.findById(id).orElseThrow(() -> new UsersException("User with Id " + id + " not found", HttpStatus.NOT_FOUND));

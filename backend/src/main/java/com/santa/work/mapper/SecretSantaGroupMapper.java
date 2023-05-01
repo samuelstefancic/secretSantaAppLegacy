@@ -21,12 +21,14 @@ public class SecretSantaGroupMapper {
     private final UserServiceImpl userService;
     private final InvitationServiceImpl invitationService;
     private final MatchServiceImpl matchService;
+    private final SecretSantaGroupServiceImpl secretService;
 
-    public SecretSantaGroupMapper(@Lazy UserMapperDelegate userMapper, UserServiceImpl userService, InvitationServiceImpl invitationService, MatchServiceImpl matchService) {
+    public SecretSantaGroupMapper(@Lazy UserMapperDelegate userMapper, UserServiceImpl userService, InvitationServiceImpl invitationService, MatchServiceImpl matchService, SecretSantaGroupServiceImpl secretService) {
         this.userMapper = userMapper;
         this.userService = userService;
         this.invitationService = invitationService;
         this.matchService = matchService;
+        this.secretService = secretService;
     }
 
     public SecretSantaGroupDTO toSecretSantaGroupDTO(SecretSantaGroup group) {
@@ -44,40 +46,28 @@ public class SecretSantaGroupMapper {
 
         return new SecretSantaGroupDTO(id, name, adminId, url, matchesGenerated, memberIds, invitationIds, matchIds);
     }
-
     public SecretSantaGroup toSecretSantaGroupEntity(SecretSantaGroupDTO groupDTO, UUID adminId) {
         if (groupDTO == null) {
             return null;
         }
-
         UUID id = groupDTO.getId();
         String name = groupDTO.getName();
         String url = groupDTO.getUrl();
         boolean matchesGenerated = groupDTO.isMatchesGenerated();
-
         Users admin = userService.findUserById(adminId);
-        List<Users> members = userService.findUsersByIds(groupDTO.getMemberIds());
-
-        List<Invitation> invitations = InvitationMapper.toInvitations(groupDTO.getInvitationIds(), invitationService);
-
-        List<Match> matches = MatchMapper.toMatches(groupDTO.getMatchIds(), matchService);
-
+        List<Users> members = userService.findUsersById(groupDTO.getMemberIds());
+        List<Invitation> invitations = invitationService.findInvitationsByIds(groupDTO.getInvitationIds());
+        List<Match> matches = matchService.findMatchesByIds(groupDTO.getMatchIds());
         return new SecretSantaGroup(id, name, admin, url, matchesGenerated, members, invitations, matches);
     }
-    public List<SecretSantaGroup> toSecretSantaGroupEntities(List<UUID> groupIds,
-                                                                    Users admin,
-                                                                    UserServiceImpl userService,
-                                                                    InvitationServiceImpl invitationService,
-                                                                    MatchServiceImpl matchService,
-                                                                    SecretSantaGroupServiceImpl secretSantaGroupService) {
+    public List<SecretSantaGroup> toSecretSantaGroupEntities(List<UUID> groupIds, UUID adminId) {
         if (groupIds == null || groupIds.isEmpty()) {
             return Collections.emptyList();
         }
-
-        List<SecretSantaGroupDTO> groupDTOs = secretSantaGroupService.findSecretSantaGroupDTOsByIds(groupIds);
+        List<SecretSantaGroupDTO> groupDTOs = secretService.findSecretSantaGroupDTOsByIds(groupIds);
         List<SecretSantaGroup> groups = new ArrayList<>();
         for (SecretSantaGroupDTO groupDTO : groupDTOs) {
-            SecretSantaGroup group = toSecretSantaGroupEntity(groupDTO, admin, userService, invitationService, matchService);
+            SecretSantaGroup group = toSecretSantaGroupEntity(groupDTO, adminId);
             groups.add(group);
         }
         return groups;
@@ -88,7 +78,6 @@ public class SecretSantaGroupMapper {
         }
         return groups.stream().map(SecretSantaGroup::getId).collect(Collectors.toList());
     }
-
     public List<SecretSantaGroupDTO> toSecretSantaGroupDTOs(List<SecretSantaGroup> groups) {
         if (groups == null) {
             return Collections.emptyList();

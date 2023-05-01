@@ -15,6 +15,7 @@ import com.santa.work.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
     private final SecretSantaGroupMapper secretSantaGroupMapper;
 
     @Autowired
-    public SecretSantaGroupServiceImpl(SecretSantaGroupRepository secretRepository, UserRepository userRepository, SecretSantaGroupRepository secretSantaGroupRepository, SecretSantaGroupMapper secretSantaGroupMapper ) {
+    public SecretSantaGroupServiceImpl(@Lazy SecretSantaGroupRepository secretRepository, UserRepository userRepository, SecretSantaGroupRepository secretSantaGroupRepository, SecretSantaGroupMapper secretSantaGroupMapper ) {
         this.secretRepository = secretRepository;
         this.userRepository = userRepository;
         this.secretSantaGroupRepository = secretSantaGroupRepository;
@@ -140,6 +141,14 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
         return secretRepository.findAll();
     }
 
+    public List<SecretSantaGroup> getAllSecretSantaGroupsByAdminId(UUID adminId) {
+        return secretRepository.findAllByAdminId(adminId);
+    }
+    public List<SecretSantaGroupDTO> findAllSecretSantaGroupsByUserId(UUID admin_id) {
+        List<SecretSantaGroup> secretSantaGroups = secretRepository.findAllByAdmin_Id(admin_id);
+        List<SecretSantaGroupDTO> secretSantaGroupDTOs = secretSantaGroupMapper.toSecretSantaGroupDTOs(secretSantaGroups);
+        return secretSantaGroupDTOs;
+    }
 
 
     /**
@@ -234,14 +243,15 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
         List<SecretSantaGroup> secretSantaGroups = secretSantaGroupRepository.findAllByIdIn(groupIds);
         return secretSantaGroupMapper.toSecretSantaGroupDTOs(secretSantaGroups);
     }
-
+/* Déplacer cette méthode dans UserService
     public List<SecretSantaGroupDTO> findSecretSantaGroupDTOsByUserId(UUID userId) {
-        List<SecretSantaGroup> secretSantaGroups = secretSantaGroupRepository.findAllSecretSantaGroupsByUserId(userId);
+        List<SecretSantaGroup> secretSantaGroups = secretSantaGroupRepository.findAllSecretSantaGroupsByAdminId(userId);
         return secretSantaGroupMapper.toSecretSantaGroupDTOs(secretSantaGroups);
     }
+*/
 
     public SecretSantaGroupDTO createSecretSantaGroupDTO(SecretSantaGroupDTO secretSantaGroupDTO, UUID creatorId) {
-        SecretSantaGroup secretSantaGroup = secretSantaGroupMapper.toSecretSantaGroupEntity(secretSantaGroupDTO);
+        SecretSantaGroup secretSantaGroup = secretSantaGroupMapper.toSecretSantaGroupEntity(secretSantaGroupDTO, creatorId);
         SecretSantaGroup createdGroup = createSecretSantaGroup(secretSantaGroup, creatorId);
         return secretSantaGroupMapper.toSecretSantaGroupDTO(createdGroup);
     }

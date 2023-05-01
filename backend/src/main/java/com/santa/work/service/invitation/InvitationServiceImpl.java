@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 @Service
@@ -61,6 +62,13 @@ public class InvitationServiceImpl implements InvitationService{
     public Invitation findInvitationById(UUID invitationId) {
         return invitationRepository.findById(invitationId)
                 .orElseThrow(() -> new InvitationException("Invitation with id " + invitationId + " not found", HttpStatus.NOT_FOUND));
+    }
+
+    public List<Invitation> findInvitationsByIds(List<UUID> invitationIds) {
+        if (invitationIds == null || invitationIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return invitationRepository.findAllById(invitationIds);
     }
 
     public Invitation updateInvitation(Invitation updatedInvitation, UUID id) {

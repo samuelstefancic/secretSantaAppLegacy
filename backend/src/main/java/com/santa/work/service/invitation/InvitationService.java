@@ -17,4 +17,6 @@ public interface InvitationService {
     Invitation declineInvitation(UUID invitationId);
     Invitation extendExpiryDate(UUID invitationId);
     String generateUniqueToken();
+    List<Invitation> findInvitationsByIds(List<UUID> invitationIds);
+    List<Invitation> getAllInvitationsByIds(List<UUID> invitationsIds);
 }

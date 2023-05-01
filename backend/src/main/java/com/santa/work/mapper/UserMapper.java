@@ -82,4 +82,6 @@ public class UserMapper implements UserMapperDelegate {
         }
         return users.stream().map(this::toUserDTO).collect(Collectors.toList());
     }
+
+
 }

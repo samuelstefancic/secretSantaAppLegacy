@@ -14,15 +14,13 @@ import com.santa.work.service.secretSantaGroup.SecretSantaGroupService;
 import jakarta.transaction.Transactional;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -35,7 +33,7 @@ public class MatchServiceImpl implements MatchService{
     private final InvitationRepository invitationRepository;
 
     @Autowired
-    public MatchServiceImpl(MatchRepository matchRepository, SecretSantaGroupService secretSantaGroupService, SecretSantaGroupRepository secretSantaGroupRepository, UserRepository userRepository, InvitationRepository invitationRepository) {
+    public MatchServiceImpl(@Lazy MatchRepository matchRepository, SecretSantaGroupService secretSantaGroupService, SecretSantaGroupRepository secretSantaGroupRepository, UserRepository userRepository, InvitationRepository invitationRepository) {
         this.matchRepository = matchRepository;
         this.secretSantaGroupService = secretSantaGroupService;
         this.secretSantaGroupRepository = secretSantaGroupRepository;
@@ -65,6 +63,13 @@ public class MatchServiceImpl implements MatchService{
     public Match findMatchById(UUID id) {
         return matchRepository.findById(id)
                 .orElseThrow(() -> new MatchException("Match with ID : " + id + " not found", HttpStatus.NOT_FOUND));
+    }
+
+    public List<Match> findMatchesByIds(List<UUID> matchIds) {
+        if (matchIds == null || matchIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return matchRepository.findAllById(matchIds);
     }
 
 
@@ -173,6 +178,7 @@ public class MatchServiceImpl implements MatchService{
             list.set(i, temp);
         }
     }
+
 
 
 }
