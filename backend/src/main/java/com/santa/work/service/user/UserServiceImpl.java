@@ -14,10 +14,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -67,6 +64,12 @@ public class UserServiceImpl implements UserService{
         return userMapper.toUserDTO(user);
     }
 
+    public List<Users> findUsersById(List<UUID> usersIds) {
+        if (usersIds == null || usersIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return userRepository.findAllById(usersIds);
+    }
     public UserDTO updateUserWithDTO(UUID id, UserDTO updatedUserDTO) {
         Users updatedUser = userMapper.toUserEntity(updatedUserDTO);
         Users user = userRepository.findById(id).orElseThrow(() -> new UsersException("User with Id " + id + " not found", HttpStatus.NOT_FOUND));

@@ -28,7 +28,6 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
     private final SecretSantaGroupRepository secretRepository;
     private final UserRepository userRepository;
     private final SecretSantaGroupRepository secretSantaGroupRepository;
-
     private final SecretSantaGroupMapper secretSantaGroupMapper;
 
     @Autowired
@@ -235,4 +234,16 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
         List<SecretSantaGroup> secretSantaGroups = secretSantaGroupRepository.findAllByIdIn(groupIds);
         return secretSantaGroupMapper.toSecretSantaGroupDTOs(secretSantaGroups);
     }
+
+    public List<SecretSantaGroupDTO> findSecretSantaGroupDTOsByUserId(UUID userId) {
+        List<SecretSantaGroup> secretSantaGroups = secretSantaGroupRepository.findAllSecretSantaGroupsByUserId(userId);
+        return secretSantaGroupMapper.toSecretSantaGroupDTOs(secretSantaGroups);
+    }
+
+    public SecretSantaGroupDTO createSecretSantaGroupDTO(SecretSantaGroupDTO secretSantaGroupDTO, UUID creatorId) {
+        SecretSantaGroup secretSantaGroup = secretSantaGroupMapper.toSecretSantaGroupEntity(secretSantaGroupDTO);
+        SecretSantaGroup createdGroup = createSecretSantaGroup(secretSantaGroup, creatorId);
+        return secretSantaGroupMapper.toSecretSantaGroupDTO(createdGroup);
+    }
+
 }

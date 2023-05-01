@@ -9,7 +9,6 @@ import com.santa.work.service.invitation.InvitationServiceImpl;
 import com.santa.work.service.match.MatchServiceImpl;
 import com.santa.work.service.secretSantaGroup.SecretSantaGroupServiceImpl;
 import com.santa.work.service.user.UserServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -19,9 +18,15 @@ import java.util.stream.Collectors;
 public class SecretSantaGroupMapper {
 
     private final UserMapperDelegate userMapper;
+    private final UserServiceImpl userService;
+    private final InvitationServiceImpl invitationService;
+    private final MatchServiceImpl matchService;
 
-    public SecretSantaGroupMapper(@Lazy UserMapperDelegate userMapper) {
+    public SecretSantaGroupMapper(@Lazy UserMapperDelegate userMapper, UserServiceImpl userService, InvitationServiceImpl invitationService, MatchServiceImpl matchService) {
         this.userMapper = userMapper;
+        this.userService = userService;
+        this.invitationService = invitationService;
+        this.matchService = matchService;
     }
 
     public SecretSantaGroupDTO toSecretSantaGroupDTO(SecretSantaGroup group) {
@@ -40,11 +45,7 @@ public class SecretSantaGroupMapper {
         return new SecretSantaGroupDTO(id, name, adminId, url, matchesGenerated, memberIds, invitationIds, matchIds);
     }
 
-    public SecretSantaGroup toSecretSantaGroupEntity(SecretSantaGroupDTO groupDTO,
-                                                            Users admin,
-                                                            UserServiceImpl userService,
-                                                            InvitationServiceImpl invitationService,
-                                                            MatchServiceImpl matchService) {
+    public SecretSantaGroup toSecretSantaGroupEntity(SecretSantaGroupDTO groupDTO, UUID adminId) {
         if (groupDTO == null) {
             return null;
         }
@@ -54,7 +55,8 @@ public class SecretSantaGroupMapper {
         String url = groupDTO.getUrl();
         boolean matchesGenerated = groupDTO.isMatchesGenerated();
 
-        List<Users> members = userMapper.toUsers(groupDTO.getMemberIds(), userService);
+        Users admin = userService.findUserById(adminId);
+        List<Users> members = userService.findUsersByIds(groupDTO.getMemberIds());
 
         List<Invitation> invitations = InvitationMapper.toInvitations(groupDTO.getInvitationIds(), invitationService);
 
