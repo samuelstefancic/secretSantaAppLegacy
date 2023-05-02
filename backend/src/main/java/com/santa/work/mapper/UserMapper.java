@@ -20,10 +20,12 @@ import java.util.stream.Collectors;
 public class UserMapper implements UserMapperDelegate {
 
     private final SecretSantaGroupMapper secretSantaGroupMapper;
+    private final WishMapper wishMapper;
 
     @Autowired
-    public UserMapper(@Lazy SecretSantaGroupMapper secretSantaGroupMapper) {
+    public UserMapper(@Lazy SecretSantaGroupMapper secretSantaGroupMapper, @Lazy WishMapper wishMapper) {
         this.secretSantaGroupMapper = secretSantaGroupMapper;
+        this.wishMapper = wishMapper;
     }
 
     public UserDTO toUserDTO(Users user) {
@@ -40,7 +42,7 @@ public class UserMapper implements UserMapperDelegate {
         String lastname = user.getLastname();
         String login = user.getLogin();
         String password = user.getPassword();
-        List<WishDTO> wishList = WishMapper.toWishDtos(user.getWishList());
+        List<WishDTO> wishList = wishMapper.toWishDtos(user.getWishList());
         List<UUID> groupIds = secretSantaGroupMapper.toUUIDs(user.getGroups());
         Set<InvitationDTO> invitations = InvitationMapper.toInvitationDTOs(user.getInvitations());
         return new UserDTO(id, role, firstname, lastname, login, password, wishList, groupIds, invitations);
@@ -53,7 +55,7 @@ public class UserMapper implements UserMapperDelegate {
         String login = userDTO.getLogin();
         String password = userDTO.getPassword();
         Users user = new Users(id, role, firstname, lastname, login, password, new ArrayList<>(), new ArrayList<>(), new HashSet<>());
-        List<Wish> wishList = WishMapper.toWishEntities(userDTO.getWishList(), user);
+        List<Wish> wishList = wishMapper.toWishEntities(userDTO.getWishList(), user);
         user.setWishList(wishList);
         //List<SecretSantaGroup> groups = SecretSantaGroupMapper.toSecretSantaGroupEntities(userDTO.getGroupIds(), admin, userService, invitationService, matchService, secretSantaGroupService);
         //user.setGroups(groups);

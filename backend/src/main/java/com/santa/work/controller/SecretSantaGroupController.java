@@ -45,12 +45,6 @@ public class SecretSantaGroupController {
         return new ResponseEntity<>(secretSantaGroupMapper.toSecretSantaGroupDTO(group), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{groupId}")
-    public ResponseEntity<SecretSantaGroupDTO> deleteSecretSantaGroup(@PathVariable UUID groupId) {
-        secretSantaGroupService.deleteSecretSantaGroupById(groupId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
     @PutMapping("/{groupId}")
     public ResponseEntity<SecretSantaGroupDTO> updateSecretSantaGroup(@PathVariable UUID groupId, @RequestBody SecretSantaGroupDTO updatedGroupDTO) {
         SecretSantaGroup group = secretSantaGroupService.updateSecretSantaGroup(groupId, updatedGroupDTO);
@@ -58,10 +52,11 @@ public class SecretSantaGroupController {
     }
 
     @DeleteMapping("/{groupId}")
-    public ResponseEntity<Void> deleteSecretSantaGroupById(@PathVariable UUID groupId) {
+    public ResponseEntity<SecretSantaGroupDTO> deleteSecretSantaGroupById(@PathVariable UUID groupId) {
         secretSantaGroupService.deleteSecretSantaGroupById(groupId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
 
 /* Old methods for the posterity, the souvenirs, the good moments ...
     @PostMapping

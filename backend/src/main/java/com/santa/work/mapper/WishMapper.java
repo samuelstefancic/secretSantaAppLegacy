@@ -12,7 +12,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 @Component
 public class WishMapper {
-    public static WishDTO toWishDTO(Wish wish) {
+    public WishDTO toWishDTO(Wish wish) {
             if (wish == null) {
                 throw new WishNotFoundException("Wish not found");
             }
@@ -24,7 +24,7 @@ public class WishMapper {
             UUID userId = wish.getUsers().getId();
             return new WishDTO(id, title, description, url, userId);
     }
-    public static Wish toWishEntity(WishDTO wishDTO, Users user) {
+    public Wish toWishEntity(WishDTO wishDTO, Users user) {
         if (wishDTO == null) {
             throw new InvalidWishException("Wish is null");
         }
@@ -40,10 +40,10 @@ public class WishMapper {
         wish.setUsers(user);
         return wish;
     }
-    public static List<WishDTO> toWishDtos(List<Wish> wishes) {
-        return wishes.stream().map(WishMapper::toWishDTO).collect(Collectors.toList());
+    public List<WishDTO> toWishDtos(List<Wish> wishes) {
+        return wishes.stream().map(this::toWishDTO).collect(Collectors.toList());
     }
-    public static List<Wish> toWishEntities(List<WishDTO> wishDtos, Users user) {
+    public List<Wish> toWishEntities(List<WishDTO> wishDtos, Users user) {
         return wishDtos.stream().map(wishDto -> toWishEntity(wishDto, user)).collect(Collectors.toList());
     }
 }
