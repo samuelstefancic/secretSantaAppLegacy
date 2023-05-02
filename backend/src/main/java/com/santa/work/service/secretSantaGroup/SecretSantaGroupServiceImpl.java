@@ -144,12 +144,12 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
         return secretRepository.findAll();
     }
 
-
-
     public List<SecretSantaGroup> getAllSecretSantaGroupsByAdminId(UUID adminId) {
         return secretRepository.findAllByAdminId(adminId);
     }
-/*
+
+    /*
+    Méthode à supprimer ou a remplacer dans le futur
     public List<SecretSantaGroupDTO> findAllSecretSantaGroupsByUserId(UUID admin_id) {
         List<SecretSantaGroup> secretSantaGroups = secretRepository.findAllByAdmin_Id(admin_id);
         List<SecretSantaGroupDTO> secretSantaGroupDTOs = secretSantaGroupMapper.toSecretSantaGroupDTOs(secretSantaGroups);

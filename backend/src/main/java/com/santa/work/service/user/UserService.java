@@ -1,5 +1,6 @@
 package com.santa.work.service.user;
 
+import com.santa.work.dto.SecretSantaGroupDTO;
 import com.santa.work.dto.UserDTO;
 import com.santa.work.entity.Users;
 import org.springframework.stereotype.Service;
@@ -21,4 +22,5 @@ public interface UserService {
 
     UserDTO createUserDTO(UserDTO userDTO);
     UserDTO findUserByIdWithDTO(UUID userId);
+    List<SecretSantaGroupDTO> findAllSecretSantaGroupById(UUID userId);
 }
