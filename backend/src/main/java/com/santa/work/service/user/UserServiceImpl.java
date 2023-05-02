@@ -1,15 +1,19 @@
 package com.santa.work.service.user;
 
+import com.santa.work.dto.SecretSantaGroupDTO;
 import com.santa.work.dto.UserDTO;
+import com.santa.work.entity.SecretSantaGroup;
 import com.santa.work.entity.Users;
 import com.santa.work.entity.Wish;
 import com.santa.work.exception.usersExceptions.UsersException;
+import com.santa.work.mapper.SecretSantaGroupMapper;
 import com.santa.work.mapper.UserMapper;
 import com.santa.work.mapper.WishMapper;
 import com.santa.work.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,12 +27,14 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final WishMapper wishMapper;
+    private final SecretSantaGroupMapper secretSantaGroupMapper;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, WishMapper wishMapper) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, WishMapper wishMapper,@Lazy SecretSantaGroupMapper secretSantaGroupMapper) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.wishMapper = wishMapper;
+        this.secretSantaGroupMapper = secretSantaGroupMapper;
     }
 
     public UserDTO createUserDTO(UserDTO userDTO) {
@@ -50,6 +56,15 @@ public class UserServiceImpl implements UserService{
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsersException("User with id " + userId + " not found", HttpStatus.NOT_FOUND));
         return userMapper.toUserDTO(user);
+    }
+
+
+    public List<SecretSantaGroupDTO> findAllSecretSantaGroupById(UUID userId) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsersException("User with id " + userId + " not found", HttpStatus.NOT_FOUND));
+        List<SecretSantaGroup> secretSantaGroup = user.getGroups();
+        List<SecretSantaGroupDTO> secretSantaGroupDTO = secretSantaGroupMapper.toSecretSantaGroupDTOs(secretSantaGroup);
+        return secretSantaGroupDTO;
     }
 
     public UserDTO findUserByLoginWithDTO(String login) {

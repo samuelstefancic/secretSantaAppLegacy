@@ -21,14 +21,11 @@ import java.util.UUID;
 @RequestMapping("/api/wishes")
 @Slf4j
 public class WishController {
-
     private final WishServiceImpl wishService;
     @Autowired
     public WishController(WishServiceImpl wishService){this.wishService = wishService;}
 
-
     //Post
-
     @PostMapping
     public ResponseEntity<Wish> createWish(@Valid @RequestBody Wish wish) {
         Wish createdWish = wishService.createWish(wish);

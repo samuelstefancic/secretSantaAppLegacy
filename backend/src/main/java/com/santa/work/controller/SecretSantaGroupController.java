@@ -1,10 +1,11 @@
 package com.santa.work.controller;
 
+import com.santa.work.dto.SecretSantaGroupDTO;
 import com.santa.work.entity.SecretSantaGroup;
 import com.santa.work.entity.Users;
+import com.santa.work.mapper.SecretSantaGroupMapper;
 import com.santa.work.service.secretSantaGroup.SecretSantaGroupServiceImpl;
 import com.santa.work.service.user.UserServiceImpl;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -21,13 +22,48 @@ import java.util.UUID;
 public class SecretSantaGroupController {
     private final SecretSantaGroupServiceImpl secretSantaGroupService;
     private final UserServiceImpl userService;
+    private final SecretSantaGroupMapper secretSantaGroupMapper;
 
     @Autowired
-    public SecretSantaGroupController(@Lazy SecretSantaGroupServiceImpl secretSantaGroupService, UserServiceImpl userService) {
+    public SecretSantaGroupController(@Lazy SecretSantaGroupServiceImpl secretSantaGroupService, UserServiceImpl userService, @Lazy SecretSantaGroupMapper secretSantaGroupMapper) {
         this.secretSantaGroupService = secretSantaGroupService;
         this.userService = userService;
+        this.secretSantaGroupMapper = secretSantaGroupMapper;
     }
 
+    @PostMapping
+    public ResponseEntity<SecretSantaGroupDTO> createSecretSantaGroup(@RequestBody SecretSantaGroupDTO secretSantaGroupDTO) {
+        UUID adminId = secretSantaGroupDTO.getAdminId();
+        Users currentUser = userService.findUserById(adminId);
+        SecretSantaGroup createdGroup = secretSantaGroupService.createSecretSantaGroup(secretSantaGroupMapper.toSecretSantaGroupEntity(secretSantaGroupDTO, adminId), currentUser.getId());
+        return new ResponseEntity<>(secretSantaGroupMapper.toSecretSantaGroupDTO(createdGroup), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{groupId}")
+    public ResponseEntity<SecretSantaGroupDTO> getSecretSantaGroupById(@PathVariable UUID groupId) {
+        SecretSantaGroup group = secretSantaGroupService.findSecretSantaGroupById(groupId);
+        return new ResponseEntity<>(secretSantaGroupMapper.toSecretSantaGroupDTO(group), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<SecretSantaGroupDTO> deleteSecretSantaGroup(@PathVariable UUID groupId) {
+        secretSantaGroupService.deleteSecretSantaGroupById(groupId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping("/{groupId}")
+    public ResponseEntity<SecretSantaGroupDTO> updateSecretSantaGroup(@PathVariable UUID groupId, @RequestBody SecretSantaGroupDTO updatedGroupDTO) {
+        SecretSantaGroup group = secretSantaGroupService.updateSecretSantaGroup(groupId, updatedGroupDTO);
+        return new ResponseEntity<>(secretSantaGroupMapper.toSecretSantaGroupDTO(group), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<Void> deleteSecretSantaGroupById(@PathVariable UUID groupId) {
+        secretSantaGroupService.deleteSecretSantaGroupById(groupId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+/* Old methods for the posterity, the souvenirs, the good moments ...
     @PostMapping
     public ResponseEntity<SecretSantaGroup> createSecretSantaGroup(@RequestBody SecretSantaGroup secretSantaGroup, Principal principal) {
         Users currentUser = userService.findUserByLogin(principal.getName());
@@ -52,4 +88,6 @@ public class SecretSantaGroupController {
         secretSantaGroupService.deleteSecretSantaGroupById(groupId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+ */
 }

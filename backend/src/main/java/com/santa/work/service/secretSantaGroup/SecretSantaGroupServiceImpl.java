@@ -42,7 +42,6 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
         this.secretSantaGroupMapper = secretSantaGroupMapper;
     }
 
-
     public SecretSantaGroup createSecretSantaGroup(SecretSantaGroup secretSantaGroup, UUID creatorId) {
         try {
             SecretSantaGroup createdGroup = secretSantaGroupRepository.save(secretSantaGroup);
@@ -80,13 +79,16 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
                 .orElseThrow(() -> new UsersException("User with id " + santaGroupId + " not found", HttpStatus.NOT_FOUND));
     }
 
-    public SecretSantaGroup updateSecretSantaGroup(UUID id, SecretSantaGroup updatedGroup) {
+    public SecretSantaGroup updateSecretSantaGroup(UUID id, SecretSantaGroupDTO updatedGroupDTO) {
+        SecretSantaGroup updatedGroup = secretSantaGroupMapper.toSecretSantaGroupEntity(updatedGroupDTO, updatedGroupDTO.getAdminId());
         SecretSantaGroup group = secretRepository.findById(id)
                 .orElseThrow(() -> new SecretSantaGroupException("The secret santa group with ID : " + id + " not found", HttpStatus.NOT_FOUND));
+
         // Validate if the new admin exists
         Users newAdmin = userRepository.findById(updatedGroup.getAdmin().getId())
                 .orElseThrow(() -> new SecretSantaGroupException("New admin user not found", HttpStatus.NOT_FOUND));
         group.setAdmin(newAdmin);
+
         // Update the simple entity
         group.setName(updatedGroup.getName());
 
@@ -101,10 +103,8 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
         // Update invitation List
         group.getInvitations().removeIf(invitation -> !updatedGroup.getInvitations().contains(invitation));
         for (Invitation updatedInvitation : updatedGroup.getInvitations()) {
-            //Looking for the Id who is the same as the updated Id for the list invitation
             Optional<Invitation> existInviOpt = group.getInvitations().stream().filter(invitation -> invitation.getId().equals(updatedInvitation.getId())).findFirst();
             if (existInviOpt.isPresent()) {
-                //Update invitation who exists
                 Invitation existInvitation = existInviOpt.get();
                 existInvitation.setEmail(updatedInvitation.getEmail());
                 existInvitation.setToken(updatedInvitation.getToken());
@@ -113,10 +113,10 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
                 group.addInvitation(updatedInvitation);
             }
         }
+
         // Update match list and validate new matches
         group.getMatches().removeIf(match -> !updatedGroup.getMatches().contains(match));
         for (Match updatedMatch : updatedGroup.getMatches()) {
-            // Find the existing match for the same match ID
             Optional<Match> existMatchOpt = group.getMatches().stream().filter(match -> match.getId().equals(updatedMatch.getId())).findFirst();
             if (existMatchOpt.isPresent()) {
                 Match matchExist = existMatchOpt.get();
@@ -127,8 +127,10 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
                 group.addMatch(updatedMatch);
             }
         }
+
         return secretRepository.save(group);
     }
+
 
     public void deleteSecretSantaGroupById(UUID id) {
         if (!secretRepository.existsById(id)) {

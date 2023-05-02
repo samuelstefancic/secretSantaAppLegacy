@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface SecretSantaGroupService {
     SecretSantaGroup createSecretSantaGroup(SecretSantaGroup secretSantaGroup, UUID creatorUserId);
     SecretSantaGroup findSecretSantaGroupById(UUID id);
-    SecretSantaGroup updateSecretSantaGroup(UUID id, SecretSantaGroup secretSantaGroup);
+    SecretSantaGroup updateSecretSantaGroup(UUID id, SecretSantaGroupDTO updatedGroupDTO);
     void deleteSecretSantaGroupById(UUID id);
     List<SecretSantaGroup> getAllSecretSantaGroups();
 
