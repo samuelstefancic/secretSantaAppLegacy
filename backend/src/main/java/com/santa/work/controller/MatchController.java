@@ -1,12 +1,13 @@
 package com.santa.work.controller;
 
+import com.santa.work.dto.MatchDTO;
 import com.santa.work.entity.Match;
 import com.santa.work.entity.Users;
+import com.santa.work.mapper.MatchMapper;
 import com.santa.work.service.match.MatchServiceImpl;
 import com.santa.work.service.user.UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -25,12 +26,25 @@ public class MatchController {
 
     private final MatchServiceImpl matchService;
     private final UserServiceImpl userService;
+    private final MatchMapper matchMapper;
 
     @Autowired
-    public MatchController(@Lazy MatchServiceImpl matchService, UserServiceImpl userService) {
+    public MatchController(@Lazy MatchServiceImpl matchService, UserServiceImpl userService, MatchMapper matchMapper) {
         this.matchService = matchService;
         this.userService = userService;
+        this.matchMapper = matchMapper;
     }
+
+
+    @Operation(summary = "Get a match by id")
+    @GetMapping("/{id}")
+    public ResponseEntity<MatchDTO> getMatchById(@PathVariable UUID id) {
+        Match match = matchService.findMatchById(id);
+        return new ResponseEntity<>(matchMapper.toMatchDTO(match), HttpStatus.OK);
+    }
+
+
+    /*
     @Operation(summary = "Basic post method, create a match")
     @PostMapping
     public ResponseEntity<Match> createMatch(@Valid @RequestBody Match match) {
@@ -38,9 +52,11 @@ public class MatchController {
         return new ResponseEntity<>(createdMatch, HttpStatus.CREATED);
     }
 
+
+
     @Operation(summary = "Get all matches")
     @GetMapping("/{id}")
-    public ResponseEntity<Match> getMatchById(@PathVariable UUID id) {
+    public ResponseEntity<Match> getMatchById2(@PathVariable UUID id) {
         Match match = matchService.findMatchById(id);
         return new ResponseEntity<>(match, HttpStatus.OK);
     }
@@ -64,5 +80,5 @@ public class MatchController {
         List<Match> matches = matchService.generateMatchesForGroup(groupId, currentUser.getId());
         return new ResponseEntity<>(matches, HttpStatus.CREATED);
     }
-
+*/
 }
