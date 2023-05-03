@@ -37,7 +37,7 @@ public class InvitationMapper {
         }
         return invitations.stream().map(InvitationMapper::toInvitationDTO).collect(Collectors.toSet());
     }
-    public static Invitation toInvitationEntity(InvitationDTO invitationDTO, SecretSantaGroup group, Users invitedUser, Users sender) {
+    public Invitation toInvitationEntity(InvitationDTO invitationDTO) {
         if (invitationDTO == null) {
             return null;
         }
@@ -52,12 +52,9 @@ public class InvitationMapper {
         invitation.setToken(token);
         invitation.setStatus(invitationStatus);
         invitation.setExpiryDate(expiryDate);
-        invitation.setGroup(group);
-        invitation.setInvitedUser(invitedUser);
-        invitation.setSender(sender);
         return invitation;
     }
-    public static Set<Invitation> toInvitationEntities(Set<InvitationDTO> invitationDTOs) {
+    public Set<Invitation> toInvitationEntities(Set<InvitationDTO> invitationDTOs) {
         if (invitationDTOs == null) {
             return Collections.emptySet();
         }
@@ -73,13 +70,13 @@ public class InvitationMapper {
                 })
                 .collect(Collectors.toSet());
     }
-    public static List<UUID> toUUIDs(List<Invitation> invitations) {
+    public List<UUID> toUUIDs(List<Invitation> invitations) {
         if (invitations == null) {
             return Collections.emptyList();
         }
         return invitations.stream().map(Invitation::getId).collect(Collectors.toList());
     }
-    public static List<Invitation> toInvitations(List<UUID> invitationIds, InvitationServiceImpl invitationService) {
+    public List<Invitation> toInvitations(List<UUID> invitationIds, InvitationServiceImpl invitationService) {
         if (invitationIds == null || invitationIds.isEmpty()) {
             return Collections.emptyList();
         }

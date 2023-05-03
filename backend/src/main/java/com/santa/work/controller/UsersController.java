@@ -3,6 +3,7 @@ package com.santa.work.controller;
 import com.santa.work.dto.SecretSantaGroupDTO;
 import com.santa.work.dto.UserDTO;
 import com.santa.work.entity.Users;
+import com.santa.work.enumeration.Role;
 import com.santa.work.mapper.UserMapper;
 import com.santa.work.service.secretSantaGroup.SecretSantaGroupServiceImpl;
 import com.santa.work.service.user.UserServiceImpl;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 @Slf4j
 public class UsersController {
 
@@ -35,9 +36,11 @@ public class UsersController {
     //DTO
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
+            userDTO.setRole(Role.USER);
             Users users = userMapper.toUserEntity(userDTO);
             Users createdUser = userService.createUser(users);
             UserDTO createdUserDTO = userMapper.toUserDTO(createdUser);
+            System.out.println("User with id: " + createdUserDTO.getId() + " created");
             return new ResponseEntity<>(createdUserDTO, HttpStatus.CREATED);
     }
     @GetMapping("/{userId}")

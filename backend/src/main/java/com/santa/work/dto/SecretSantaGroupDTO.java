@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,7 +17,7 @@ public class SecretSantaGroupDTO {
     private UUID adminId;
     private String url;
     private boolean matchesGenerated;
-    private List<UUID> memberIds;
-    private List<UUID> invitationIds;
-    private List<UUID> matchIds;
+    private List<UUID> memberIds = new ArrayList<>();
+    private List<UUID> invitationIds = new ArrayList<>();
+    private List<UUID> matchIds = new ArrayList<>();
 }

@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/matches")
+@RequestMapping("/matches")
 @Slf4j
 public class MatchController {
 
@@ -35,6 +35,13 @@ public class MatchController {
         this.matchMapper = matchMapper;
     }
 
+    @Operation(summary = "Generate matches for the whole group")
+    @PostMapping("/generate/{groupId}/{adminId}")
+    public ResponseEntity<List<MatchDTO>> generateMatchesForGroup(@PathVariable UUID groupId, @PathVariable UUID adminId) {
+        List<Match> generatedMatches = matchService.generateMatchesForGroup(groupId, adminId);
+        List<MatchDTO> generatedMatchDtos = generatedMatches.stream().map(matchMapper::toMatchDTO).toList();
+        return new ResponseEntity<>(generatedMatchDtos, HttpStatus.CREATED);
+    }
 
     @Operation(summary = "Get a match by id")
     @GetMapping("/{id}")
@@ -43,6 +50,35 @@ public class MatchController {
         return new ResponseEntity<>(matchMapper.toMatchDTO(match), HttpStatus.OK);
     }
 
+    @Operation(summary = "Get all matches for a user - giver")
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<MatchDTO>> getAllMatchesForUser(@PathVariable UUID userId) {
+        List<Match> matches = matchService.findMatchesByGiverUserId(userId);
+        List<MatchDTO> matchDtos = matches.stream().map(matchMapper::toMatchDTO).toList();
+        return new ResponseEntity<>(matchDtos, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get all matches from a group")
+    @GetMapping("/group/{groupId}")
+    public ResponseEntity<List<MatchDTO>> getMatchesByGroupdId(@PathVariable UUID groupId) {
+        List<Match> matches = matchService.findMatchesByGroupId(groupId);
+        List<MatchDTO> matchDtos = matches.stream().map(matchMapper::toMatchDTO).toList();
+        return new ResponseEntity<>(matchDtos, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get all matches")
+    @GetMapping("/all")
+    public ResponseEntity<List<MatchDTO>> getAllMatches() {
+        List<Match> matches = matchService.getAllMatches();
+        List<MatchDTO> matchDTOs = matchMapper.toMatchDtos(matches);
+        return new ResponseEntity<>(matchDTOs, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{matchId}")
+    public ResponseEntity<Void> deleteMatch(@PathVariable UUID matchId) {
+        matchService.deleteMatchById(matchId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
     /*
     @Operation(summary = "Basic post method, create a match")

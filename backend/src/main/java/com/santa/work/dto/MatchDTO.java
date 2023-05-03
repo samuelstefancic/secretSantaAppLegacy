@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -11,8 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class MatchDTO {
     private UUID id;
-    private UUID giverUserId;
     private UUID receiverUserId;
-    private boolean isRevealed;
-    private UUID groupId;
+    private String receiverFirstName;
+    private String receiverLastName;
 }

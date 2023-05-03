@@ -15,12 +15,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 @Component
 public class MatchMapper {
-    public static MatchDTO toMatchDTO(Match match) {
+    public MatchDTO toMatchDTO(Match match) {
         if (match == null) {
             throw new MatchNotFoundException("Match not found");
         }
-        return new MatchDTO(match.getId(), match.getGiverUser().getId(), match.getReceiverUser().getId(),
-                match.isRevealed(), match.getGroup().getId());
+        return new MatchDTO(match.getId(), match.getReceiverUser().getId(), match.getReceiverUser().getFirstname(),
+                match.getReceiverUser().getLastname());
     }
     public static Match toMatchEntity(MatchDTO matchDTO, Users giverUser, Users receiverUser, SecretSantaGroup group) {
         if (matchDTO == null) {
@@ -30,7 +30,6 @@ public class MatchMapper {
         match.setId(matchDTO.getId());
         match.setGiverUser(giverUser);
         match.setReceiverUser(receiverUser);
-        match.setRevealed(matchDTO.isRevealed());
         match.setGroup(group);
 
         return match;
@@ -40,6 +39,13 @@ public class MatchMapper {
             return Collections.emptyList();
         }
         return matches.stream().map(Match::getId).collect(Collectors.toList());
+    }
+
+    public List<MatchDTO> toMatchDtos(List<Match> matches) {
+        if (matches == null) {
+            return Collections.emptyList();
+        }
+        return matches.stream().map(this::toMatchDTO).collect(Collectors.toList());
     }
 
     public static List<Match> toMatches(List<UUID> matchesIds, MatchServiceImpl matchService) {

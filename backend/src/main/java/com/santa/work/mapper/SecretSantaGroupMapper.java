@@ -18,19 +18,20 @@ import java.util.stream.Collectors;
 @Component
 public class SecretSantaGroupMapper {
 
-    @Autowired
+    private final InvitationMapper invitationMapper;
     private final UserMapperDelegate userMapper;
-    @Autowired
+
     private final UserServiceImpl userService;
-    @Autowired
+
     private final InvitationServiceImpl invitationService;
-    @Autowired
+
     private final MatchServiceImpl matchService;
-    @Autowired
+
     private final SecretSantaGroupServiceImpl secretService;
 @Autowired
-    public SecretSantaGroupMapper(@Lazy UserMapperDelegate userMapper, UserServiceImpl userService, InvitationServiceImpl invitationService, MatchServiceImpl matchService,@Lazy SecretSantaGroupServiceImpl secretService) {
-        this.userMapper = userMapper;
+    public SecretSantaGroupMapper(@Lazy InvitationMapper invitationMapper, @Lazy UserMapperDelegate userMapper, UserServiceImpl userService, @Lazy InvitationServiceImpl invitationService, MatchServiceImpl matchService, @Lazy SecretSantaGroupServiceImpl secretService) {
+    this.invitationMapper = invitationMapper;
+    this.userMapper = userMapper;
         this.userService = userService;
         this.invitationService = invitationService;
         this.matchService = matchService;
@@ -47,7 +48,7 @@ public class SecretSantaGroupMapper {
         String url = group.getUrl();
         boolean matchesGenerated = group.isMatchesGenerated();
         List<UUID> memberIds = userMapper.toUUIDs(group.getMembers());
-        List<UUID> invitationIds = InvitationMapper.toUUIDs(group.getInvitations());
+        List<UUID> invitationIds = invitationMapper.toUUIDs(group.getInvitations());
         List<UUID> matchIds = MatchMapper.toUUIDs(group.getMatches());
 
         return new SecretSantaGroupDTO(id, name, adminId, url, matchesGenerated, memberIds, invitationIds, matchIds);

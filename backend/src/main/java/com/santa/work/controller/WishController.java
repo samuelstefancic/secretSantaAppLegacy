@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/wishes")
+@RequestMapping("/wishes")
 @Slf4j
 public class WishController {
     private final WishServiceImpl wishService;

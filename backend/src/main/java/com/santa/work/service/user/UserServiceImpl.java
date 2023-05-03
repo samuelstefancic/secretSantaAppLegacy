@@ -49,7 +49,17 @@ public class UserServiceImpl implements UserService{
             throw new UsersException("failed to create User " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+    public Users createUser(Users user) {
+        try {
+            Users createdUser = userRepository.save(user);
+            if (Objects.equals(createdUser.getId(), null)) {
+                throw new UsersException("failed to create User, id is null", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            return createdUser;
+        } catch (DataAccessException | ConstraintViolationException e) {
+            throw new UsersException("failed to create User " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     //Find
 
     public UserDTO findUserByIdWithDTO(UUID userId) {
@@ -137,17 +147,7 @@ public class UserServiceImpl implements UserService{
 
     //Old methods, which are not used anymore due to the DTO mapping
 
-    public Users createUser(Users user) {
-       try {
-           Users createdUser = userRepository.save(user);
-           if (Objects.equals(createdUser.getId(), null)) {
-               throw new UsersException("failed to create User, id is null", HttpStatus.INTERNAL_SERVER_ERROR);
-           }
-           return createdUser;
-       } catch (DataAccessException | ConstraintViolationException e) {
-           throw new UsersException("failed to create User " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-       }
-    }
+
 
     public Users findUserById(UUID userId) {
         return userRepository.findById(userId)

@@ -21,11 +21,13 @@ public class UserMapper implements UserMapperDelegate {
 
     private final SecretSantaGroupMapper secretSantaGroupMapper;
     private final WishMapper wishMapper;
+    private final InvitationMapper invitationMapper;
 
     @Autowired
-    public UserMapper(@Lazy SecretSantaGroupMapper secretSantaGroupMapper, @Lazy WishMapper wishMapper) {
+    public UserMapper(@Lazy SecretSantaGroupMapper secretSantaGroupMapper, @Lazy WishMapper wishMapper, @Lazy InvitationMapper invitationMapper) {
         this.secretSantaGroupMapper = secretSantaGroupMapper;
         this.wishMapper = wishMapper;
+        this.invitationMapper = invitationMapper;
     }
 
     public UserDTO toUserDTO(Users user) {
@@ -36,16 +38,16 @@ public class UserMapper implements UserMapperDelegate {
             throw new InvalidUserException("User login or pasword is null");
         }
         //Add
-        UUID id = user.getId();
+       /* UUID id = user.getId();
         Role role = user.getRole();
         String firstname = user.getFirstname();
         String lastname = user.getLastname();
         String login = user.getLogin();
-        String password = user.getPassword();
+        String password = user.getPassword();*/
         List<WishDTO> wishList = wishMapper.toWishDtos(user.getWishList());
         List<UUID> groupIds = secretSantaGroupMapper.toUUIDs(user.getGroups());
         Set<InvitationDTO> invitations = InvitationMapper.toInvitationDTOs(user.getInvitations());
-        return new UserDTO(id, role, firstname, lastname, login, password, wishList, groupIds, invitations);
+        return new UserDTO(user.getId(), user.getRole(), user.getFirstname(), user.getLastname(), user.getLogin(), user.getPassword(), user.getEmail(), wishList, groupIds, invitations);
     }
     public Users toUserEntity(UserDTO userDTO) {
         UUID id = userDTO.getId();
@@ -54,12 +56,13 @@ public class UserMapper implements UserMapperDelegate {
         String lastname = userDTO.getLastname();
         String login = userDTO.getLogin();
         String password = userDTO.getPassword();
-        Users user = new Users(id, role, firstname, lastname, login, password, new ArrayList<>(), new ArrayList<>(), new HashSet<>());
+        String email = userDTO.getEmail();
+        Users user = new Users(id, role, firstname, lastname, login, password, email, new ArrayList<>(), new ArrayList<>(), new HashSet<>());
         List<Wish> wishList = wishMapper.toWishEntities(userDTO.getWishList(), user);
         user.setWishList(wishList);
         //List<SecretSantaGroup> groups = SecretSantaGroupMapper.toSecretSantaGroupEntities(userDTO.getGroupIds(), admin, userService, invitationService, matchService, secretSantaGroupService);
         //user.setGroups(groups);
-        Set<Invitation> invitations = InvitationMapper.toInvitationEntities(userDTO.getInvitations());
+        Set<Invitation> invitations = invitationMapper.toInvitationEntities(userDTO.getInvitations());
         user.setInvitations(invitations);
         return user;
     }
@@ -84,6 +87,4 @@ public class UserMapper implements UserMapperDelegate {
         }
         return users.stream().map(this::toUserDTO).collect(Collectors.toList());
     }
-
-
 }

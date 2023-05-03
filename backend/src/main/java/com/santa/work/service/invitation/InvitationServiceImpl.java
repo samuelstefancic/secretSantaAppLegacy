@@ -1,24 +1,28 @@
 package com.santa.work.service.invitation;
 
+import com.santa.work.dto.InvitationDTO;
 import com.santa.work.entity.Invitation;
 import com.santa.work.entity.SecretSantaGroup;
 import com.santa.work.entity.Users;
 import com.santa.work.enumeration.InvitationStatus;
 import com.santa.work.exception.invitationExceptions.InvitationException;
+import com.santa.work.exception.secretSantaGroupExceptions.SecretSantaGroupNotFoundException;
+import com.santa.work.exception.usersExceptions.UserNotFoundException;
+import com.santa.work.mapper.InvitationMapper;
 import com.santa.work.repository.InvitationRepository;
 import com.santa.work.repository.SecretSantaGroupRepository;
 import com.santa.work.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+
 @Service
 @Transactional
 public class InvitationServiceImpl implements InvitationService{
@@ -26,37 +30,53 @@ public class InvitationServiceImpl implements InvitationService{
     private final InvitationRepository invitationRepository;
     private final UserRepository userRepository;
     private final SecretSantaGroupRepository secretSantaGroupRepository;
+    private final InvitationMapper invitationMapper;
     @Autowired
-    public InvitationServiceImpl(InvitationRepository invitationRepository, UserRepository userRepository, SecretSantaGroupRepository secretSantaGroupRepository) {
+    public InvitationServiceImpl(InvitationRepository invitationRepository, UserRepository userRepository, SecretSantaGroupRepository secretSantaGroupRepository,@Lazy InvitationMapper invitationMapper) {
         this.invitationRepository = invitationRepository;
         this.userRepository = userRepository;
         this.secretSantaGroupRepository = secretSantaGroupRepository;
+        this.invitationMapper = invitationMapper;
     }
 
-    public Invitation createInvitation(Invitation invitation) {
+    public Invitation createInvitation(InvitationDTO invitationDTO, UUID groupId, UUID senderId) {
+        // Check if the group and invited user exist
+        SecretSantaGroup group = secretSantaGroupRepository.findById(groupId).
+                orElseThrow(() -> new SecretSantaGroupNotFoundException("The groupd with id" + groupId + " not found"));
+        Users invitedUser = userRepository.findByEmail(invitationDTO.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("User with email " + invitationDTO.getEmail() + " not found"));
+        Users sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new UserNotFoundException("User with id " + senderId + " not found"));
+
+        // Map the DTO to the entity
+        Invitation invitation = invitationMapper.toInvitationEntity(invitationDTO);
+
+        // Set group, invited user, and sender
+        invitation.setGroup(group);
+        invitation.setInvitedUser(invitedUser);
+        invitation.setSender(sender);
+
+        // Set additional fields
+        invitation.setStatus(InvitationStatus.PENDING);
+        invitation.setExpiryDate(LocalDateTime.now().plusDays(30));
+        String token = generateUniqueToken();
+        if (token == null || token.isEmpty()) {
+            throw new InvitationException("Failed to generate token for the invitation", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        invitation.setToken(token);
+
+        // Save the invitation
         try {
-            // Check if the group and invited user exist
-            UUID groupId = invitation.getGroup().getId();
-            UUID invitedUserId = invitation.getInvitedUser().getId();
-            if (!invitationRepository.existsById(groupId) || !invitationRepository.existsById(invitedUserId)) {
-                throw new InvitationException("Group or invited user not found", HttpStatus.NOT_FOUND);
-            }
-            invitation.setStatus(InvitationStatus.PENDING);
-            invitation.setExpiryDate(LocalDateTime.now().plusDays(30));
-            String token = generateUniqueToken();
-            if (token == null || token.isEmpty()) {
-                throw new InvitationException("Failed to generate token for the invitation", HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-            invitation.setToken(token);
             Invitation createdInvitation = invitationRepository.save(invitation);
             if (createdInvitation.getId() == null) {
-                throw new InvitationException("failed to create Invitation : invitation id " + invitation.getId() + " is null", HttpStatus.INTERNAL_SERVER_ERROR);
+                throw new InvitationException("Failed to create Invitation: invitation id " + invitation.getId() + " is null", HttpStatus.INTERNAL_SERVER_ERROR);
             }
             return createdInvitation;
         } catch (DataAccessException | ConstraintViolationException e) {
-            throw new InvitationException("failed to create Invitation : " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InvitationException("Failed to create Invitation: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
 
     public Invitation findInvitationById(UUID invitationId) {
@@ -93,8 +113,12 @@ public class InvitationServiceImpl implements InvitationService{
         }
     }
 
-    public List<Invitation> getAllInvitations() {
-        return invitationRepository.findAll();
+    public Set<Invitation> getAllInvitations() {
+        List<Invitation> invitationList = invitationRepository.findAll();
+        if (invitationList.isEmpty()) {
+            return Collections.emptySet();
+        }
+        return new HashSet<>(invitationList);
     }
 
     //Accept an invitation
@@ -139,5 +163,37 @@ public class InvitationServiceImpl implements InvitationService{
     }
 
     public List<Invitation> getAllInvitationsByIds(List<UUID> invitationsIds) {return invitationRepository.findAllById(invitationsIds);}
+
+    /**
+     * Old services related to the invitation
+     */
+
+    /*
+
+    public Invitation createInvitation(Invitation invitation) {
+        try {
+            // Check if the group and invited user exist
+            UUID groupId = invitation.getGroup().getId();
+            UUID invitedUserId = invitation.getInvitedUser().getId();
+            if (!invitationRepository.existsById(groupId) || !invitationRepository.existsById(invitedUserId)) {
+                throw new InvitationException("Group or invited user not found", HttpStatus.NOT_FOUND);
+            }
+            invitation.setStatus(InvitationStatus.PENDING);
+            invitation.setExpiryDate(LocalDateTime.now().plusDays(30));
+            String token = generateUniqueToken();
+            if (token == null || token.isEmpty()) {
+                throw new InvitationException("Failed to generate token for the invitation", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            invitation.setToken(token);
+            Invitation createdInvitation = invitationRepository.save(invitation);
+            if (createdInvitation.getId() == null) {
+                throw new InvitationException("failed to create Invitation : invitation id " + invitation.getId() + " is null", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            return createdInvitation;
+        } catch (DataAccessException | ConstraintViolationException e) {
+            throw new InvitationException("failed to create Invitation : " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+*/
 
 }

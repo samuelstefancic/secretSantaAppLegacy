@@ -72,6 +72,28 @@ public class MatchServiceImpl implements MatchService{
         return matchRepository.findAllById(matchIds);
     }
 
+    public List<Match> findMatchesByGiverUserId(UUID giverUserId) {
+        if (!userRepository.existsById(giverUserId)) {
+            throw new MatchException("Giver with ID : " + giverUserId + " not found", HttpStatus.NOT_FOUND);
+        }
+        List<Match> matches = matchRepository.findByGiverUser_Id(giverUserId);
+
+        if (matches == null || matches.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return matchRepository.findByGiverUser_Id(giverUserId);
+    }
+
+    public List<Match> findMatchesByGroupId(UUID groupId) {
+        if (!secretSantaGroupRepository.existsById(groupId)) {
+            throw new SecretSantaGroupException("Group with ID : " + groupId + " not found", HttpStatus.NOT_FOUND);
+        }
+        List<Match> matches = matchRepository.findByGroup_Id(groupId);
+        if (matches == null || matches.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return matches;
+    }
 
     public Match updateMatch(Match updatedMatch, UUID id) {
         Match match = matchRepository.findById(id)
@@ -178,7 +200,4 @@ public class MatchServiceImpl implements MatchService{
             list.set(i, temp);
         }
     }
-
-
-
 }

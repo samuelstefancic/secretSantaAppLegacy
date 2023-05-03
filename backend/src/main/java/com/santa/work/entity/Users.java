@@ -45,6 +45,9 @@ public class Users {
     @Column(name="password", nullable = false)
     private String password;
 
+    @Column(name ="email", nullable = false, unique = true)
+    private String email;
+
     @OneToMany(mappedBy = "users", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Wish> wishList = new ArrayList<>();
 
@@ -53,5 +56,4 @@ public class Users {
 
     @OneToMany(mappedBy = "invitedUser")
     private Set<Invitation> invitations;
-
 }

@@ -17,7 +17,7 @@ import java.security.Principal;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/groups")
+@RequestMapping("/groups")
 @Slf4j
 public class SecretSantaGroupController {
     private final SecretSantaGroupServiceImpl secretSantaGroupService;

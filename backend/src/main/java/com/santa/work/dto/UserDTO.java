@@ -3,9 +3,7 @@ package com.santa.work.dto;
 import com.santa.work.enumeration.Role;
 import lombok.*;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -17,7 +15,8 @@ public class UserDTO {
     private String lastname;
     private String login;
     private String password;
-    private List<WishDTO> wishList;
-    private List<UUID> groupIds;
-    private Set<InvitationDTO> invitations;
+    private String email;
+    private List<WishDTO> wishList = new ArrayList<>();
+    private List<UUID> groupIds = new ArrayList<>();
+    private Set<InvitationDTO> invitations = new HashSet<>();
 }
