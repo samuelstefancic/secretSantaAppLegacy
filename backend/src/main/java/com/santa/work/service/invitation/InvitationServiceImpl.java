@@ -77,8 +77,6 @@ public class InvitationServiceImpl implements InvitationService{
         }
     }
 
-
-
     public Invitation findInvitationById(UUID invitationId) {
         return invitationRepository.findById(invitationId)
                 .orElseThrow(() -> new InvitationException("Invitation with id " + invitationId + " not found", HttpStatus.NOT_FOUND));

@@ -79,6 +79,14 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
                 .orElseThrow(() -> new UsersException("User with id " + santaGroupId + " not found", HttpStatus.NOT_FOUND));
     }
 
+    public List<SecretSantaGroup> findAllSecretSantaGroups() {
+        List<SecretSantaGroup> groups = secretRepository.findAll();
+        if (groups.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return secretRepository.findAll();
+    }
+
     public SecretSantaGroup updateSecretSantaGroup(UUID id, SecretSantaGroupDTO updatedGroupDTO) {
         SecretSantaGroup updatedGroup = secretSantaGroupMapper.toSecretSantaGroupEntity(updatedGroupDTO, updatedGroupDTO.getAdminId());
         SecretSantaGroup group = secretRepository.findById(id)

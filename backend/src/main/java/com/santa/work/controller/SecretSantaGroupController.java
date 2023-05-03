@@ -6,6 +6,7 @@ import com.santa.work.entity.Users;
 import com.santa.work.mapper.SecretSantaGroupMapper;
 import com.santa.work.service.secretSantaGroup.SecretSantaGroupServiceImpl;
 import com.santa.work.service.user.UserServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -44,6 +46,15 @@ public class SecretSantaGroupController {
         SecretSantaGroup group = secretSantaGroupService.findSecretSantaGroupById(groupId);
         return new ResponseEntity<>(secretSantaGroupMapper.toSecretSantaGroupDTO(group), HttpStatus.OK);
     }
+
+    @Operation(summary = "Get all groups")
+    @GetMapping("/all")
+    public ResponseEntity<List<SecretSantaGroupDTO>> getAllSecretSantaGroups() {
+        List<SecretSantaGroup> group = secretSantaGroupService.getAllSecretSantaGroups();
+        List<SecretSantaGroup> groups = secretSantaGroupService.findAllSecretSantaGroups();
+        return new ResponseEntity<>(secretSantaGroupMapper.toSecretSantaGroupDTOs(groups), HttpStatus.OK);
+    }
+
 
     @PutMapping("/{groupId}")
     public ResponseEntity<SecretSantaGroupDTO> updateSecretSantaGroup(@PathVariable UUID groupId, @RequestBody SecretSantaGroupDTO updatedGroupDTO) {
