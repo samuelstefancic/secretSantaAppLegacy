@@ -42,9 +42,6 @@ public class MatchMapper {
     }
 
     public List<MatchDTO> toMatchDtos(List<Match> matches) {
-        if (matches == null) {
-            return Collections.emptyList();
-        }
         return matches.stream().map(this::toMatchDTO).collect(Collectors.toList());
     }
 

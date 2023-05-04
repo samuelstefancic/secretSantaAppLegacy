@@ -7,6 +7,7 @@ import com.santa.work.enumeration.Role;
 import com.santa.work.mapper.UserMapper;
 import com.santa.work.service.secretSantaGroup.SecretSantaGroupServiceImpl;
 import com.santa.work.service.user.UserServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -36,7 +37,7 @@ public class UsersController {
     //DTO
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
-            userDTO.setRole(Role.USER);
+           // userDTO.setRole(Role.USER);
             Users users = userMapper.toUserEntity(userDTO);
             Users createdUser = userService.createUser(users);
             UserDTO createdUserDTO = userMapper.toUserDTO(createdUser);
@@ -48,6 +49,17 @@ public class UsersController {
         Users user = userService.findUserById(userId);
         UserDTO userDTO = userMapper.toUserDTO(user);
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
+    }
+    @GetMapping("/{userId}/groups")
+    public ResponseEntity<List<SecretSantaGroupDTO>> getAllSecretSantaGroupsByUserId(@PathVariable("userId") UUID userId) {
+        List<SecretSantaGroupDTO> secretSantaGroupDTOs = userService.findAllSecretSantaGroupById(userId);
+        return new ResponseEntity<>(secretSantaGroupDTOs, HttpStatus.OK);
+    }
+    @Operation(summary = "Get all users")
+    @GetMapping("/all")
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<Users> users = userService.getAllUsers();
+        return new ResponseEntity<>(userMapper.toDtoList(users), HttpStatus.OK);
     }
 
     @PutMapping("/{userId}")
@@ -64,11 +76,7 @@ public class UsersController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/{userId}/groups")
-    public ResponseEntity<List<SecretSantaGroupDTO>> getAllSecretSantaGroupsByUserId(@PathVariable("userId") UUID userId) {
-        List<SecretSantaGroupDTO> secretSantaGroupDTOs = userService.findAllSecretSantaGroupById(userId);
-        return new ResponseEntity<>(secretSantaGroupDTOs, HttpStatus.OK);
-    }
+
 
 
     /* Old methods, without DTO, for the future, if we need to use them or for the reference or for the tests, or for the future or for the past or

@@ -113,7 +113,7 @@ public class InvitationServiceImpl implements InvitationService{
 
     public Set<Invitation> getAllInvitations() {
         List<Invitation> invitationList = invitationRepository.findAll();
-        if (invitationList.isEmpty()) {
+        if (invitationList.isEmpty() || invitationList == null) {
             return Collections.emptySet();
         }
         return new HashSet<>(invitationList);

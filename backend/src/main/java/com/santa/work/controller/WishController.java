@@ -44,7 +44,7 @@ public class WishController {
 
     //Get
     @Operation(summary = "Get all wishes")
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<WishDTO>> getAllWishes() {
         List<Wish> wishes = wishService.getAllWishes();
         return new ResponseEntity<>(wishMapper.toWishDtos(wishes), HttpStatus.OK);

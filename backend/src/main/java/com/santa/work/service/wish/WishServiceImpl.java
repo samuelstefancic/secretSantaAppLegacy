@@ -10,6 +10,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -82,6 +83,10 @@ public class WishServiceImpl implements WishService {
     }
 
     public List<Wish> getAllWishes() {
-        return wishRepository.findAll();
+        List<Wish> wishes = wishRepository.findAll();
+        if (wishes == null || wishes.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return wishes;
     }
 }

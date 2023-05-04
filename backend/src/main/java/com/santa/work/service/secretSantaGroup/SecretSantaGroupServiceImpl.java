@@ -44,26 +44,32 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
 
     public SecretSantaGroup createSecretSantaGroup(SecretSantaGroup secretSantaGroup, UUID creatorId) {
         try {
-            SecretSantaGroup createdGroup = secretSantaGroupRepository.save(secretSantaGroup);
-
+            secretSantaGroupRepository.save(secretSantaGroup);
             // Validate if the creator user has the appropriate role (admin)
             Users creator = userRepository.findById(creatorId)
                     .orElseThrow(() -> new SecretSantaGroupException("User not found", HttpStatus.NOT_FOUND));
             creator.setRole(Role.ADMIN);
 
-            //Define the group creator as admin
+            // Define the group creator as admin
             secretSantaGroup.setAdmin(creator);
+            String uniqueUrl = generateUniqueGroupUrl(secretSantaGroup.getName(), secretSantaGroup.getId());
+            secretSantaGroup.setUrl(uniqueUrl);
+
+            // Add the creator as a group member
+
+
+            SecretSantaGroup createdGroup = secretSantaGroupRepository.save(secretSantaGroup);
+            createdGroup.addMember(creator);
+            secretSantaGroupRepository.save(createdGroup);
+            userRepository.save(creator);
+
             if (!creator.getRole().equals(Role.ADMIN)) {
                 throw new SecretSantaGroupException("User does not have the appropriate role to create a group", HttpStatus.FORBIDDEN);
             }
 
-            //Add the creator as a group member
-            secretSantaGroup.getMembers().add(creator);
-            //Add the groups in the List of groups of the creator
-            creator.getGroups().add(secretSantaGroup);
-
-            String uniqueUrl = generateUniqueGroupUrl(secretSantaGroup.getName(),secretSantaGroup.getId());
-            secretSantaGroup.setUrl(uniqueUrl);
+            // Add the groups in the List of groups of the creator
+            creator.getGroups().add(createdGroup);
+            userRepository.save(creator);
 
             if (createdGroup.getId() == null) {
                 throw new SecretSantaGroupException("Failed to create Secret Santa Group: group id is null", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -74,6 +80,20 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
         }
     }
 
+
+    public void addUserToGroup(UUID userId, UUID groupId) {
+        try {
+            Users user = userRepository.findById(userId)
+                    .orElseThrow(() -> new UsersException("User not found", HttpStatus.NOT_FOUND));
+            SecretSantaGroup group = secretRepository.findById(groupId)
+                    .orElseThrow(() -> new SecretSantaGroupException("Secret Santa Group not found", HttpStatus.NOT_FOUND));
+            group.addMember(user);
+            secretRepository.save(group);
+        } catch (DataAccessException | ConstraintViolationException e) {
+            throw new SecretSantaGroupException("Failed to add user to group: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public SecretSantaGroup findSecretSantaGroupById(UUID santaGroupId) {
         return secretRepository.findById(santaGroupId)
                 .orElseThrow(() -> new UsersException("User with id " + santaGroupId + " not found", HttpStatus.NOT_FOUND));
@@ -81,10 +101,10 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
 
     public List<SecretSantaGroup> findAllSecretSantaGroups() {
         List<SecretSantaGroup> groups = secretRepository.findAll();
-        if (groups.isEmpty()) {
+        if (groups.isEmpty() || groups == null) {
             return Collections.emptyList();
         }
-        return secretRepository.findAll();
+        return groups;
     }
 
     public SecretSantaGroup updateSecretSantaGroup(UUID id, SecretSantaGroupDTO updatedGroupDTO) {

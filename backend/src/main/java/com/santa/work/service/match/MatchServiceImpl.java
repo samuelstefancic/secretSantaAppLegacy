@@ -125,8 +125,12 @@ public class MatchServiceImpl implements MatchService{
         }
     }
 
-    public List<Match> getAllMatches() {
-        return matchRepository.findAll();
+    public List<Match>  getAllMatches() {
+        List<Match> matches = matchRepository.findAll();
+        if (matches == null || matches.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return matches;
     }
 
     public List<Match> getAllMatchesByIds(List<UUID> matchesIds) {return matchRepository.findAllById(matchesIds);}

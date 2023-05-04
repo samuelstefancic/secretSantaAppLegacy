@@ -207,9 +207,12 @@ public class UserServiceImpl implements UserService{
         }
 
     }
-
     public List<Users> getAllUsers() {
-        return userRepository.findAll();
+        List<Users> users = userRepository.findAll();
+        if (users == null || users.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return users;
     }
 
     public List<Users> getAllUsersByIds(List<UUID> userIds) {

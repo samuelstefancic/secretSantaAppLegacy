@@ -3,9 +3,12 @@ package com.santa.work.entity;
 import com.santa.work.enumeration.InvitationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.catalina.User;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.collection.spi.PersistentBag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,11 +45,11 @@ public class SecretSantaGroup {
     private boolean matchesGenerated = false;
 
     //List des membres du groupe
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
-            name = "group_users",
+            name = "group_members",
             joinColumns = @JoinColumn(name = "group_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
+            inverseJoinColumns = @JoinColumn(name = "member_id")
     )
     private List<Users> members = new ArrayList<>();
 
@@ -74,5 +77,8 @@ public class SecretSantaGroup {
         }
         return true;
     }
-
+    public void addMember(Users user) {
+        this.members.add(user);
+        user.getGroups().add(this);
+    }
 }

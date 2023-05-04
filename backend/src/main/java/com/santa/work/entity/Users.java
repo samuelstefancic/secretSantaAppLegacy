@@ -51,9 +51,14 @@ public class Users {
     @OneToMany(mappedBy = "users", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Wish> wishList = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<SecretSantaGroup> groups = new ArrayList<>();
 
     @OneToMany(mappedBy = "invitedUser")
     private Set<Invitation> invitations;
+
+    public void addGroup(SecretSantaGroup group) {
+        groups.add(group);
+        group.addMember(this);
+    }
 }

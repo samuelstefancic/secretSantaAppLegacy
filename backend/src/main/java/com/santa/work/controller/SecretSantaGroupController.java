@@ -50,7 +50,7 @@ public class SecretSantaGroupController {
     @Operation(summary = "Get all groups")
     @GetMapping("/all")
     public ResponseEntity<List<SecretSantaGroupDTO>> getAllSecretSantaGroups() {
-        List<SecretSantaGroup> group = secretSantaGroupService.getAllSecretSantaGroups();
+        //List<SecretSantaGroup> group = secretSantaGroupService.getAllSecretSantaGroups();
         List<SecretSantaGroup> groups = secretSantaGroupService.findAllSecretSantaGroups();
         return new ResponseEntity<>(secretSantaGroupMapper.toSecretSantaGroupDTOs(groups), HttpStatus.OK);
     }
