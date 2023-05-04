@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 @Service
 public interface WishService {
-    Wish createWish(Wish wish);
+    Wish createWish(Wish wish, UUID userId);
     Wish findWishById(UUID id);
     Wish findByTitle(String title);
     Wish findByDescription(String description);

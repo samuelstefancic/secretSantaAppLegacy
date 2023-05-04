@@ -28,22 +28,21 @@ public class WishServiceImpl implements WishService {
         this.userRepository = userRepository;
     }
 
-    public Wish createWish(Wish wish) {
+    public Wish createWish(Wish wish, UUID userId) {
         try {
-            Users user = wish.getUsers();
-            userRepository.findById(user.getId())
-                    .orElseThrow(() -> new UserNotFoundException("User with id " + user + " not found"));
+            Users user = userRepository.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
+            wish.setUsers(user);
             Wish createdWish = wishRepository.save(wish);
             if (createdWish.getId() == null) {
                 throw new WishException("Failed to create Wish, id is null", HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            user.getWishList().add(createdWish);
-            userRepository.save(user);
             return createdWish;
         } catch (DataAccessException | ConstraintViolationException e) {
             throw new WishException("Failed to create Wish " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     public Wish findWishById(UUID wishId) {
         return wishRepository.findById(wishId)

@@ -74,6 +74,7 @@ public class MatchController {
         return new ResponseEntity<>(matchDTOs, HttpStatus.OK);
     }
 
+    @Operation(summary = "Delete a match")
     @DeleteMapping("/{matchId}")
     public ResponseEntity<Void> deleteMatch(@PathVariable UUID matchId) {
         matchService.deleteMatchById(matchId);
