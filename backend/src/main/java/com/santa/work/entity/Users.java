@@ -52,13 +52,15 @@ public class Users {
     private List<Wish> wishList = new ArrayList<>();
 
     @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<SecretSantaGroup> groups = new ArrayList<>();
+    private List<SecretSantaGroup> groups;
 
     @OneToMany(mappedBy = "invitedUser")
     private Set<Invitation> invitations;
 
-    public void addGroup(SecretSantaGroup group) {
-        groups.add(group);
-        group.addMember(this);
+    public List<SecretSantaGroup> getGroups() {
+        if (groups == null) {
+            groups = new ArrayList<>();
+        }
+        return groups;
     }
 }

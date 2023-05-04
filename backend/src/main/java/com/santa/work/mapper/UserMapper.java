@@ -58,7 +58,7 @@ public class UserMapper implements UserMapperDelegate {
         String password = userDTO.getPassword();
         String email = userDTO.getEmail();
         Users user = new Users(id, role, firstname, lastname, login, password, email, new ArrayList<>(), new ArrayList<>(), new HashSet<>());
-        List<Wish> wishList = wishMapper.toWishEntities(userDTO.getWishList(), user);
+        List<Wish> wishList = wishMapper.toWishEntities(userDTO.getWishList());
         user.setWishList(wishList);
         //List<SecretSantaGroup> groups = SecretSantaGroupMapper.toSecretSantaGroupEntities(userDTO.getGroupIds(), admin, userService, invitationService, matchService, secretSantaGroupService);
         //user.setGroups(groups);

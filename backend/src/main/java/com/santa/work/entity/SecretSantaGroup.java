@@ -51,7 +51,7 @@ public class SecretSantaGroup {
             joinColumns = @JoinColumn(name = "group_id"),
             inverseJoinColumns = @JoinColumn(name = "member_id")
     )
-    private List<Users> members = new ArrayList<>();
+    private List<Users> members;
 
     //List invitation groupe secretsanta, invitation liée à un groupe
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -61,6 +61,12 @@ public class SecretSantaGroup {
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Match> matches = new ArrayList<>();
 
+    public List<Users> getMembers() {
+        if (members == null) {
+            members = new ArrayList<>();
+        }
+        return members;
+    }
     public void addInvitation(Invitation invitation) {
         invitations.add(invitation);
         invitation.setGroup(this);

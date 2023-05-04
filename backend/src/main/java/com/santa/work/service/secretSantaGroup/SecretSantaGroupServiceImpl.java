@@ -1,17 +1,18 @@
 package com.santa.work.service.secretSantaGroup;
 
 import com.santa.work.dto.SecretSantaGroupDTO;
-import com.santa.work.dto.UserDTO;
 import com.santa.work.entity.Invitation;
 import com.santa.work.entity.Match;
 import com.santa.work.entity.SecretSantaGroup;
 import com.santa.work.entity.Users;
 import com.santa.work.enumeration.Role;
 import com.santa.work.exception.secretSantaGroupExceptions.SecretSantaGroupException;
+import com.santa.work.exception.secretSantaGroupExceptions.SecretSantaGroupNotFoundException;
 import com.santa.work.exception.usersExceptions.UsersException;
 import com.santa.work.mapper.SecretSantaGroupMapper;
 import com.santa.work.repository.SecretSantaGroupRepository;
 import com.santa.work.repository.UserRepository;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.transaction.Transactional;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,21 +31,21 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
 
     private final UserRepository userRepository;
 
-    private final SecretSantaGroupRepository secretSantaGroupRepository;
-
     private final SecretSantaGroupMapper secretSantaGroupMapper;
 
     @Autowired
-    public SecretSantaGroupServiceImpl(@Lazy SecretSantaGroupRepository secretRepository, UserRepository userRepository, SecretSantaGroupRepository secretSantaGroupRepository,@Lazy SecretSantaGroupMapper secretSantaGroupMapper ) {
+    public SecretSantaGroupServiceImpl(@Lazy SecretSantaGroupRepository secretRepository, UserRepository userRepository, @Lazy SecretSantaGroupMapper secretSantaGroupMapper ) {
         this.secretRepository = secretRepository;
         this.userRepository = userRepository;
-        this.secretSantaGroupRepository = secretSantaGroupRepository;
         this.secretSantaGroupMapper = secretSantaGroupMapper;
     }
 
+    //Create
+
+    @Operation(summary = "Create a new group")
     public SecretSantaGroup createSecretSantaGroup(SecretSantaGroup secretSantaGroup, UUID creatorId) {
         try {
-            secretSantaGroupRepository.save(secretSantaGroup);
+            secretRepository.save(secretSantaGroup);
             // Validate if the creator user has the appropriate role (admin)
             Users creator = userRepository.findById(creatorId)
                     .orElseThrow(() -> new SecretSantaGroupException("User not found", HttpStatus.NOT_FOUND));
@@ -56,11 +57,10 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
             secretSantaGroup.setUrl(uniqueUrl);
 
             // Add the creator as a group member
+            SecretSantaGroup createdGroup = secretRepository.save(secretSantaGroup);
+            createdGroup.setMembers(userRepository.findAllById(Collections.singleton(creatorId)));
 
-
-            SecretSantaGroup createdGroup = secretSantaGroupRepository.save(secretSantaGroup);
-            createdGroup.addMember(creator);
-            secretSantaGroupRepository.save(createdGroup);
+            secretRepository.save(createdGroup);
             userRepository.save(creator);
 
             if (!creator.getRole().equals(Role.ADMIN)) {
@@ -80,20 +80,20 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
         }
     }
 
-
-    public void addUserToGroup(UUID userId, UUID groupId) {
+    public SecretSantaGroup addUserToGroup(UUID userId, UUID groupId) {
         try {
             Users user = userRepository.findById(userId)
                     .orElseThrow(() -> new UsersException("User not found", HttpStatus.NOT_FOUND));
             SecretSantaGroup group = secretRepository.findById(groupId)
                     .orElseThrow(() -> new SecretSantaGroupException("Secret Santa Group not found", HttpStatus.NOT_FOUND));
             group.addMember(user);
-            secretRepository.save(group);
+            return secretRepository.save(group);
         } catch (DataAccessException | ConstraintViolationException e) {
             throw new SecretSantaGroupException("Failed to add user to group: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    //Read
     public SecretSantaGroup findSecretSantaGroupById(UUID santaGroupId) {
         return secretRepository.findById(santaGroupId)
                 .orElseThrow(() -> new UsersException("User with id " + santaGroupId + " not found", HttpStatus.NOT_FOUND));
@@ -107,7 +107,45 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
         return groups;
     }
 
+    public List<Users> findAllMembersSantaGroups(UUID groupId) {
+        SecretSantaGroup group = secretRepository.findById(groupId)
+                .orElseThrow(() -> new SecretSantaGroupNotFoundException("Secret Santa Group not found"));
+        List<Users> members = group.getMembers();
+        if (members.isEmpty() || members == null) {
+            return Collections.emptyList();
+        }
+        return members;
+    }
+
+    public List<SecretSantaGroupDTO> findSecretSantaGroupDTOsByIds(List<UUID> groupIds) {
+        List<SecretSantaGroup> secretSantaGroups = secretRepository.findAllByIdIn(groupIds);
+        return secretSantaGroupMapper.toSecretSantaGroupDTOs(secretSantaGroups);
+    }
+
+    public List<SecretSantaGroup> findSecretSantaGroupEntitiesByIds(List<UUID> groupIds, UUID adminId) {
+        return secretSantaGroupMapper.toSecretSantaGroupEntities(groupIds, adminId);
+    }
+
+    @Operation(summary = "Non used")
+    public List<SecretSantaGroup> getAllSecretSantaGroups() {
+        return secretRepository.findAll();
+    }
+
+    public List<SecretSantaGroup> getAllSecretSantaGroupsByAdminId(UUID adminId) {
+        return secretRepository.findAllByAdminId(adminId);
+    }
+
+    //Update
+
     public SecretSantaGroup updateSecretSantaGroup(UUID id, SecretSantaGroupDTO updatedGroupDTO) {
+        if (updatedGroupDTO.getName() == null || updatedGroupDTO.getName().trim().isEmpty()) {
+            throw new SecretSantaGroupException("Name field cannot be empty", HttpStatus.BAD_REQUEST);
+        }
+
+        if (updatedGroupDTO.getAdminId() == null) {
+            throw new SecretSantaGroupException("AdminId field cannot be empty", HttpStatus.BAD_REQUEST);
+        }
+
         SecretSantaGroup updatedGroup = secretSantaGroupMapper.toSecretSantaGroupEntity(updatedGroupDTO, updatedGroupDTO.getAdminId());
         SecretSantaGroup group = secretRepository.findById(id)
                 .orElseThrow(() -> new SecretSantaGroupException("The secret santa group with ID : " + id + " not found", HttpStatus.NOT_FOUND));
@@ -159,7 +197,9 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
         return secretRepository.save(group);
     }
 
+    //Delete
 
+    @Operation(summary = "Delete a Secret Santa Group by ID")
     public void deleteSecretSantaGroupById(UUID id) {
         if (!secretRepository.existsById(id)) {
             throw new SecretSantaGroupException("Secret Santa Group with ID : " + id + " not found", HttpStatus.NOT_FOUND);
@@ -170,12 +210,16 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
             throw new SecretSantaGroupException("Failed to delete Secret Santa Group with ID : " + id, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    public List<SecretSantaGroup> getAllSecretSantaGroups() {
-        return secretRepository.findAll();
-    }
 
-    public List<SecretSantaGroup> getAllSecretSantaGroupsByAdminId(UUID adminId) {
-        return secretRepository.findAllByAdminId(adminId);
+    @Operation(summary = "Delete an User from a Secret Santa Group")
+    public SecretSantaGroup deleteUserFromSecretSantaGroup(UUID userId, UUID groupId) {
+        SecretSantaGroup group = secretRepository.findById(groupId)
+                .orElseThrow(() -> new SecretSantaGroupException("Secret Santa Group with ID : " + groupId + " not found", HttpStatus.NOT_FOUND));
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsersException("User with ID : " + userId + " not found", HttpStatus.NOT_FOUND));
+        group.getMembers().remove(user);
+        user.getGroups().remove(group);
+        return secretRepository.save(group);
     }
 
     /*
@@ -275,18 +319,11 @@ public class SecretSantaGroupServiceImpl implements SecretSantaGroupService {
     }
 
     //DTO
-    public List<SecretSantaGroupDTO> findSecretSantaGroupDTOsByIds(List<UUID> groupIds) {
-        List<SecretSantaGroup> secretSantaGroups = secretSantaGroupRepository.findAllByIdIn(groupIds);
-        return secretSantaGroupMapper.toSecretSantaGroupDTOs(secretSantaGroups);
-    }
 
-    public List<SecretSantaGroup> findSecretSantaGroupEntitiesByIds(List<UUID> groupIds, UUID adminId) {
-        return secretSantaGroupMapper.toSecretSantaGroupEntities(groupIds, adminId);
-    }
 /*
  //Déplacer cette méthode dans UserService
     public List<SecretSantaGroupDTO> findSecretSantaGroupDTOsByUserId(UUID userId) {
-        List<SecretSantaGroup> secretSantaGroups = secretSantaGroupRepository.findAllSecretSantaGroupsByAdminId(userId);
+        List<SecretSantaGroup> secretSantaGroups = secretRepository.findAllSecretSantaGroupsByAdminId(userId);
         return secretSantaGroupMapper.toSecretSantaGroupDTOs(secretSantaGroups);
     }
 */

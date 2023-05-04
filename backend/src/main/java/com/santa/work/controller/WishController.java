@@ -37,10 +37,10 @@ public class WishController {
     @Operation(summary = "Create a new wish")
     @PostMapping
     public ResponseEntity<WishDTO> createWish(@Valid @RequestBody WishDTO wishDTO) {
-        Users user = userService.findUserById(wishDTO.getUserId());
-        Wish createdWish = wishService.createWish(wishMapper.toWishEntity(wishDTO, user));
+        Wish createdWish = wishService.createWish(wishMapper.toWishEntity(wishDTO));
         return new ResponseEntity<>(wishMapper.toWishDTO(createdWish), HttpStatus.CREATED);
     }
+
 
     //Get
     @Operation(summary = "Get all wishes")
@@ -62,7 +62,7 @@ public class WishController {
     @PutMapping("/{wishId}")
     public ResponseEntity<WishDTO> updateWish(@PathVariable UUID wishId, @Valid @RequestBody WishDTO wishDTO) {
         Users user = userService.findUserById(wishDTO.getUserId());
-        Wish updatedWish = wishService.updateWish(wishMapper.toWishEntity(wishDTO, user), wishId);
+        Wish updatedWish = wishService.updateWish(wishMapper.toWishEntity(wishDTO), wishId);
         return new ResponseEntity<>(wishMapper.toWishDTO(updatedWish), HttpStatus.OK);
     }
 

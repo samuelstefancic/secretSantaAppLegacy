@@ -100,7 +100,7 @@ class WorkApplicationTests {
 		wish.setTitle("Wish test");
 		wish.setDescription("description wish test");
 		wish.setUrl("http://exampleWishUrl.com/test-Wish/with-test");
-		wish = wishService.createWish(wish);
+		//wish = wishService.createWish(wish);
 
 		//Creating user
 

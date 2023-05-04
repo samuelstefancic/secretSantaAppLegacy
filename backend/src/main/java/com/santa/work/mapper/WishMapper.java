@@ -3,8 +3,11 @@ package com.santa.work.mapper;
 import com.santa.work.dto.WishDTO;
 import com.santa.work.entity.Users;
 import com.santa.work.entity.Wish;
+import com.santa.work.exception.usersExceptions.UserNotFoundException;
 import com.santa.work.exception.wishExceptions.InvalidWishException;
 import com.santa.work.exception.wishExceptions.WishNotFoundException;
+import com.santa.work.repository.UserRepository;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -12,6 +15,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 @Component
 public class WishMapper {
+
+    private final UserRepository userRepository;
+
+    public WishMapper(@Lazy UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     public WishDTO toWishDTO(Wish wish) {
             if (wish == null) {
                 throw new WishNotFoundException("Wish not found");
@@ -24,7 +34,7 @@ public class WishMapper {
             UUID userId = wish.getUsers().getId();
             return new WishDTO(id, title, description, url, userId);
     }
-    public Wish toWishEntity(WishDTO wishDTO, Users user) {
+    public Wish toWishEntity(WishDTO wishDTO) {
         if (wishDTO == null) {
             throw new InvalidWishException("Wish is null");
         }
@@ -32,6 +42,11 @@ public class WishMapper {
         String title = wishDTO.getTitle();
         String description = wishDTO.getDescription();
         String url = wishDTO.getUrl();
+        UUID userId = wishDTO.getUserId();
+
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
+
         Wish wish = new Wish();
         wish.setId(id);
         wish.setTitle(title);
@@ -40,10 +55,12 @@ public class WishMapper {
         wish.setUsers(user);
         return wish;
     }
+
     public List<WishDTO> toWishDtos(List<Wish> wishes) {
         return wishes.stream().map(this::toWishDTO).collect(Collectors.toList());
     }
-    public List<Wish> toWishEntities(List<WishDTO> wishDtos, Users user) {
-        return wishDtos.stream().map(wishDto -> toWishEntity(wishDto, user)).collect(Collectors.toList());
+    public List<Wish> toWishEntities(List<WishDTO> wishDtos) {
+        return wishDtos.stream().map(this::toWishEntity).collect(Collectors.toList());
     }
+
 }

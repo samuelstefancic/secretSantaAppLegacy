@@ -1,11 +1,15 @@
 package com.santa.work.service.wish;
 
+import com.santa.work.entity.Users;
 import com.santa.work.entity.Wish;
+import com.santa.work.exception.usersExceptions.UserNotFoundException;
 import com.santa.work.exception.wishExceptions.WishException;
+import com.santa.work.repository.UserRepository;
 import com.santa.work.repository.WishRepository;
 import jakarta.transaction.Transactional;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,15 +22,23 @@ import java.util.UUID;
 @Transactional
 public class WishServiceImpl implements WishService {
     private final WishRepository wishRepository;
+    private final UserRepository userRepository;
     @Autowired
-    public WishServiceImpl(WishRepository wishRepository) {this.wishRepository = wishRepository;}
+    public WishServiceImpl(WishRepository wishRepository,@Lazy UserRepository userRepository) {this.wishRepository = wishRepository;
+        this.userRepository = userRepository;
+    }
 
     public Wish createWish(Wish wish) {
         try {
+            Users user = wish.getUsers();
+            userRepository.findById(user.getId())
+                    .orElseThrow(() -> new UserNotFoundException("User with id " + user + " not found"));
             Wish createdWish = wishRepository.save(wish);
             if (createdWish.getId() == null) {
                 throw new WishException("Failed to create Wish, id is null", HttpStatus.INTERNAL_SERVER_ERROR);
             }
+            user.getWishList().add(createdWish);
+            userRepository.save(user);
             return createdWish;
         } catch (DataAccessException | ConstraintViolationException e) {
             throw new WishException("Failed to create Wish " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
