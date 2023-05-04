@@ -35,11 +35,12 @@ public class WishController {
 
     //Post
     @Operation(summary = "Create a new wish")
-    @PostMapping
-    public ResponseEntity<WishDTO> createWish(@Valid @RequestBody WishDTO wishDTO) {
-        Wish createdWish = wishService.createWish(wishMapper.toWishEntity(wishDTO));
+    @PostMapping("/{userId}/createWish")
+    public ResponseEntity<WishDTO> createWish(@PathVariable UUID userId, @Valid @RequestBody WishDTO wishDTO) {
+        Wish createdWish = wishService.createWish(wishMapper.toWishEntity(wishDTO), userId);
         return new ResponseEntity<>(wishMapper.toWishDTO(createdWish), HttpStatus.CREATED);
     }
+
 
 
     //Get

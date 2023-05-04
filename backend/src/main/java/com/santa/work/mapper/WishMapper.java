@@ -42,19 +42,16 @@ public class WishMapper {
         String title = wishDTO.getTitle();
         String description = wishDTO.getDescription();
         String url = wishDTO.getUrl();
-        UUID userId = wishDTO.getUserId();
-
-        Users user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
 
         Wish wish = new Wish();
         wish.setId(id);
         wish.setTitle(title);
         wish.setDescription(description);
         wish.setUrl(url);
-        wish.setUsers(user);
+
         return wish;
     }
+
 
     public List<WishDTO> toWishDtos(List<Wish> wishes) {
         return wishes.stream().map(this::toWishDTO).collect(Collectors.toList());
