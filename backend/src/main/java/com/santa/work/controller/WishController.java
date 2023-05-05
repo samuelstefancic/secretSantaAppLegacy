@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/wishes")
+@RequestMapping("/wish")
 @Slf4j
 public class WishController {
     private final WishServiceImpl wishService;
@@ -35,7 +35,7 @@ public class WishController {
 
     //Post
     @Operation(summary = "Create a new wish")
-    @PostMapping("/{userId}/createWish")
+    @PostMapping("/createWish/{userId}")
     public ResponseEntity<WishDTO> createWish(@PathVariable UUID userId, @Valid @RequestBody WishDTO wishDTO) {
         Wish createdWish = wishService.createWish(wishMapper.toWishEntity(wishDTO), userId);
         return new ResponseEntity<>(wishMapper.toWishDTO(createdWish), HttpStatus.CREATED);
@@ -62,9 +62,10 @@ public class WishController {
     @Operation(summary = "Update wish by ID")
     @PutMapping("/{wishId}")
     public ResponseEntity<WishDTO> updateWish(@PathVariable UUID wishId, @Valid @RequestBody WishDTO wishDTO) {
-        Users user = userService.findUserById(wishDTO.getUserId());
-        Wish updatedWish = wishService.updateWish(wishMapper.toWishEntity(wishDTO), wishId);
-        return new ResponseEntity<>(wishMapper.toWishDTO(updatedWish), HttpStatus.OK);
+        Wish updatedWish = wishMapper.toWishEntity(wishDTO);
+        Wish savedWish = wishService.updateWish(updatedWish, wishId);
+        WishDTO updatedWishDTO = wishMapper.toWishDTO(savedWish);
+        return new ResponseEntity<>(updatedWishDTO, HttpStatus.OK);
     }
 
     //Delete
@@ -77,23 +78,23 @@ public class WishController {
 
    @Operation(summary = "Get a wish with the title")
    @GetMapping("/title/{title}")
-    public ResponseEntity<WishDTO> findByTitle(@PathVariable String title) {
-       Wish wish = wishService.findByTitle(title);
-       return new ResponseEntity<>(wishMapper.toWishDTO(wish), HttpStatus.OK);
+    public ResponseEntity<List<WishDTO>> findByTitle(@PathVariable String title) {
+       List<Wish> wishes = wishService.findWishByTitles(title);
+       return new ResponseEntity<>(wishMapper.toWishDtos(wishes), HttpStatus.OK);
    }
 
    @Operation(summary = "Get a wish with his description")
    @GetMapping("/description/{description}")
-   public ResponseEntity<WishDTO> findByDescription(@PathVariable String description) {
-       Wish wish = wishService.findByDescription(description);
-       return new ResponseEntity<>(wishMapper.toWishDTO(wish), HttpStatus.OK);
+   public ResponseEntity<List<WishDTO>> findByDescription(@PathVariable String description) {
+        List<Wish> wishes = wishService.findWishByDescriptions(description);
+        return new ResponseEntity<>(wishMapper.toWishDtos(wishes), HttpStatus.OK);
    }
 
    @Operation(summary = "Find wish title && description")
    @GetMapping("/title/{title}/description/{description}")
-   public ResponseEntity<WishDTO> findByTitleAndDescription(@PathVariable String title, @PathVariable String description) {
-       Wish wish = wishService.findByTitleAndDescription(title, description);
-       return new ResponseEntity<>(wishMapper.toWishDTO(wish), HttpStatus.OK);
+   public ResponseEntity<List<WishDTO>> findByTitleAndDescription(@PathVariable String title, @PathVariable String description) {
+       List<Wish> wishes = wishService.findWishByTitlesAndDescriptions(title, description);
+       return new ResponseEntity<>(wishMapper.toWishDtos(wishes), HttpStatus.OK);
    }
 
    @Operation(summary = "Find wish title || description")

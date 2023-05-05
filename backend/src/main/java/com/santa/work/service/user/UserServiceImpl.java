@@ -170,14 +170,23 @@ public class UserServiceImpl implements UserService{
 
     public Users updateUser(UUID id, Users updatedUser) {
         Users user = userRepository.findById(id).orElseThrow(() -> new UsersException("User with Id " + id + " not found", HttpStatus.NOT_FOUND));
+
+        // Fetch the existing user's wishList
+        List<Wish> existingWishList = user.getWishList();
+
         //Simple update entity
         user.setFirstname(updatedUser.getFirstname());
         user.setLastname(updatedUser.getLastname());
         user.setLogin(updatedUser.getLogin());
         user.setPassword(updatedUser.getPassword());
+
+        // Set the existing wishList to the updated user
+        updatedUser.setWishList(existingWishList);
+
         //WishList update
         //Adding a logic to delete the existing wishes that are not in the list anymore
         user.getWishList().removeIf(wish -> !updatedUser.getWishList().contains(wish));
+
         //Add or update the wishlist
         for (Wish updatedWish : updatedUser.getWishList()) {
             Optional<Wish> existWishOpt = user.getWishList().stream().filter(wish -> wish.getId().equals(updatedWish.getId())).findFirst();
@@ -194,6 +203,7 @@ public class UserServiceImpl implements UserService{
         }
         return userRepository.save(user);
     }
+
 
 
     public void deleteUserById(UUID id) {

@@ -17,4 +17,7 @@ public interface WishRepository extends JpaRepository<Wish, UUID> {
     Optional<Wish> findByTitleAndDescription(String title, String description);
     Optional<Wish> findByTitle(String title);
     Optional<Wish> findByDescription(String description);
+    List<Wish> findByTitleContainingIgnoreCase(String title);
+    List<Wish> findByDescriptionContainingIgnoreCase(String description);
+    List<Wish> findByTitleContainingIgnoreCaseAndDescriptionContainingIgnoreCase(String title, String description);
 }

@@ -14,5 +14,4 @@ public class WishDTO {
     private String title;
     private String description;
     private String url;
-    private UUID userId;
 }

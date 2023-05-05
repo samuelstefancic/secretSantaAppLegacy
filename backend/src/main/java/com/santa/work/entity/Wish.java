@@ -26,10 +26,10 @@ public class Wish {
     @Column(name = "id_wish", nullable = false, unique = true)
     private UUID id;
 
-    @Column(name="title_wish", nullable = false)
+    @Column(name="title_wish", nullable = false, length = 120)
     private String title;
 
-    @Column(name="description_wish", nullable = false)
+    @Column(name="description_wish", nullable = false, length = 750)
     private String description;
 
     @Column(name = "url_wish", nullable = false)

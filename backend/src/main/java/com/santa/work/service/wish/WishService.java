@@ -15,5 +15,11 @@ public interface WishService {
     Wish findByDescriptionAndTitleAndId(String description, String title, UUID id);
     Wish updateWish(Wish wish, UUID id);
     void deleteWishById(UUID id);
+
+    //Find lists
+
     List<Wish> getAllWishes();
+    List<Wish> findWishByTitles(String title);
+    List<Wish> findWishByDescriptions(String description);
+    List<Wish> findWishByTitlesAndDescriptions(String title, String description);
 }

@@ -31,8 +31,7 @@ public class WishMapper {
             String title = wish.getTitle();
             String description = wish.getDescription();
             String url = wish.getUrl();
-            UUID userId = wish.getUsers().getId();
-            return new WishDTO(id, title, description, url, userId);
+            return new WishDTO(id, title, description, url);
     }
     public Wish toWishEntity(WishDTO wishDTO) {
         if (wishDTO == null) {

@@ -37,6 +37,8 @@ public class WishServiceImpl implements WishService {
             if (createdWish.getId() == null) {
                 throw new WishException("Failed to create Wish, id is null", HttpStatus.INTERNAL_SERVER_ERROR);
             }
+            user.getWishList().add(createdWish);
+            userRepository.save(user);
             return createdWish;
         } catch (DataAccessException | ConstraintViolationException e) {
             throw new WishException("Failed to create Wish " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -52,6 +54,30 @@ public class WishServiceImpl implements WishService {
     public Wish findByTitle(String title) {
         return wishRepository.findByTitle(title)
                 .orElseThrow(() -> new WishException("Wish with title " + title + " not found", HttpStatus.NOT_FOUND));
+    }
+
+    public List<Wish> findWishByTitles(String title) {
+        List<Wish> wishes = wishRepository.findByTitleContainingIgnoreCase(title);
+        if (wishes.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return wishes;
+    }
+
+    public List<Wish> findWishByDescriptions(String description) {
+        List<Wish> descriptions = wishRepository.findByDescriptionContainingIgnoreCase(description);
+        if (descriptions.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return descriptions;
+    }
+
+    public List<Wish> findWishByTitlesAndDescriptions(String title, String description) {
+        List<Wish> wishes = wishRepository.findByTitleContainingIgnoreCaseAndDescriptionContainingIgnoreCase(title, description);
+        if (wishes.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return wishes;
     }
 
     public Wish findByDescription(String description) {
@@ -75,12 +101,17 @@ public class WishServiceImpl implements WishService {
     public Wish updateWish(Wish updatedWish, UUID id) {
         Wish wish = wishRepository.findById(id)
                 .orElseThrow(() -> new WishException("The wish with id " + id + " does not exist", HttpStatus.NOT_FOUND));
-        wish.setUsers(updatedWish.getUsers());
-        wish.setUrl(updatedWish.getUrl());
-        wish.setDescription(updatedWish.getDescription());
-        wish.setTitle(updatedWish.getTitle());
-        return wishRepository.save(wish);
+
+        // Get the User object from the existing wish and set it to the updated wish
+        Users user = wish.getUsers();
+        updatedWish.setUsers(user);
+
+        updatedWish.setUrl(updatedWish.getUrl());
+        updatedWish.setDescription(updatedWish.getDescription());
+        updatedWish.setTitle(updatedWish.getTitle());
+        return wishRepository.save(updatedWish);
     }
+
 
     public void deleteWishById(UUID id) {
         if (!wishRepository.existsById(id)) {
