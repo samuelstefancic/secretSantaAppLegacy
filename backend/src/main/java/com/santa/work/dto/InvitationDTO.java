@@ -13,7 +13,9 @@ import java.util.UUID;
 @NoArgsConstructor
 public class InvitationDTO {
     private UUID id;
+    private String invitationName;
     private String email;
+    private String groupUrl;
     private String token;
     private InvitationStatus invitationStatus;
     private LocalDateTime expiryDate;

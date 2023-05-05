@@ -32,6 +32,7 @@ public class InvitationController {
     @PostMapping("/{groupId}/{senderId}")
     public ResponseEntity<InvitationDTO> createInvitation(@RequestBody InvitationDTO invitationDTO, @PathVariable UUID groupId, @PathVariable UUID senderId) {
         Invitation invitation = invitationService.createInvitation(invitationDTO, groupId, senderId);
+        System.out.println(invitation.getGroupUrl());
         return new ResponseEntity<>(invitationMapper.toInvitationDTO(invitation), HttpStatus.CREATED);
     }
 

@@ -22,6 +22,7 @@ public class InvitationMapper {
             return null;
         }
         UUID id = invitation.getId();
+        String invitationName = invitation.getInvitationName();
         String email = invitation.getEmail();
         String token = invitation.getToken();
         InvitationStatus invitationStatus = invitation.getStatus();
@@ -29,7 +30,9 @@ public class InvitationMapper {
         UUID groupId = invitation.getGroup().getId();
         UUID invitedUserId = invitation.getInvitedUser().getId();
         UUID senderId = invitation.getSender().getId();
-        return new InvitationDTO(id, email, token, invitationStatus, expiryDate, groupId, invitedUserId, senderId);
+        String groupUrl = invitation.getGroupUrl();
+        System.out.println("InvitationMapper.toInvitationDTO: groupUrl = " + groupUrl);
+        return new InvitationDTO(id, invitationName, email, token,groupUrl, invitationStatus, expiryDate, groupId, invitedUserId, senderId);
     }
     public static Set<InvitationDTO> toInvitationDTOs(Set<Invitation> invitations) {
         if (invitations == null) {
@@ -42,16 +45,19 @@ public class InvitationMapper {
             return null;
         }
         UUID id = invitationDTO.getId();
+        String invitationName = invitationDTO.getInvitationName();
         String email = invitationDTO.getEmail();
         String token = invitationDTO.getToken();
         InvitationStatus invitationStatus = invitationDTO.getInvitationStatus();
         LocalDateTime expiryDate = invitationDTO.getExpiryDate();
         Invitation invitation = new Invitation();
         invitation.setId(id);
+        invitation.setInvitationName(invitationName);
         invitation.setEmail(email);
         invitation.setToken(token);
         invitation.setStatus(invitationStatus);
         invitation.setExpiryDate(expiryDate);
+        invitation.setGroupUrl(invitationDTO.getGroupUrl());
         return invitation;
     }
     public Set<Invitation> toInvitationEntities(Set<InvitationDTO> invitationDTOs) {

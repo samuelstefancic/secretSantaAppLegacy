@@ -2,9 +2,7 @@ package com.santa.work.entity;
 
 import com.santa.work.enumeration.InvitationStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
@@ -12,9 +10,11 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "invitations")
-@Data
-@NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode
 public class Invitation {
 
     @Id
@@ -27,8 +27,14 @@ public class Invitation {
     @Column(name = "id_invitation", nullable = false, unique = true)
     private UUID id;
 
+    @Column(name = "invitation_name", nullable = true)
+    private String invitationName;
+
     @Column(name = "email", nullable = false)
     private String email;
+
+    @Column(name = "group_url", nullable = true)
+    private String groupUrl;
 
     @Column(name = "token", nullable = false)
     private String token;

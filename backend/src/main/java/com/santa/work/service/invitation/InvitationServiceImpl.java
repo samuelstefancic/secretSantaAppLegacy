@@ -40,6 +40,7 @@ public class InvitationServiceImpl implements InvitationService{
     }
 
     public Invitation createInvitation(InvitationDTO invitationDTO, UUID groupId, UUID senderId) {
+
         // Check if the group and invited user exist
         SecretSantaGroup group = secretSantaGroupRepository.findById(groupId).
                 orElseThrow(() -> new SecretSantaGroupNotFoundException("The groupd with id" + groupId + " not found"));
@@ -48,6 +49,15 @@ public class InvitationServiceImpl implements InvitationService{
         Users sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new UserNotFoundException("User with id " + senderId + " not found"));
 
+        if (isUserInGroup(invitedUser, group)) {
+            throw new InvitationException("User with email " + invitedUser.getEmail() + " is already in the group", HttpStatus.BAD_REQUEST);
+        }
+        if (!canSendInvitation(group)) {
+            throw new InvitationException("Group with id " + groupId + " has reached the maximum number of invitations", HttpStatus.BAD_REQUEST);
+        }
+        String groupUrl = generateUniqueGroupUrl(groupId);
+        invitationDTO.setGroupUrl(groupUrl);
+
         // Map the DTO to the entity
         Invitation invitation = invitationMapper.toInvitationEntity(invitationDTO);
 
@@ -55,6 +65,7 @@ public class InvitationServiceImpl implements InvitationService{
         invitation.setGroup(group);
         invitation.setInvitedUser(invitedUser);
         invitation.setSender(sender);
+        invitation.setGroupUrl(groupUrl);
 
         // Set additional fields
         invitation.setStatus(InvitationStatus.PENDING);
@@ -126,6 +137,9 @@ public class InvitationServiceImpl implements InvitationService{
         if (invitation.getStatus() != InvitationStatus.PENDING) {
             throw new InvitationException("Cannot accept an invitation that is not pending", HttpStatus.BAD_REQUEST);
         }
+        if (isInvitationExpired(invitation)) {
+            throw new InvitationException("Cannot accept an invitation that has expired", HttpStatus.BAD_REQUEST);
+        }
         invitation.setStatus(InvitationStatus.ACCEPTED);
         SecretSantaGroup group = invitation.getGroup();
         Users invitedUser = invitation.getInvitedUser();
@@ -162,6 +176,86 @@ public class InvitationServiceImpl implements InvitationService{
 
     public List<Invitation> getAllInvitationsByIds(List<UUID> invitationsIds) {return invitationRepository.findAllById(invitationsIds);}
 
+    private boolean isUserInGroup(Users user, SecretSantaGroup group) {
+        return group.getMembers().contains(user);
+    }
+
+    private boolean canSendInvitation(SecretSantaGroup group) {
+        long invitationCount = invitationRepository.countByGroup(group);
+        return invitationCount < 1000;
+    }
+
+    private boolean isInvitationExpired(Invitation invitation) {
+        return LocalDateTime.now().isAfter(invitation.getExpiryDate());
+    }
+
+
+    public String generateUniqueGroupUrl(UUID groupId) {
+        String groupIdUrlSafe = groupId.toString().substring(0, 6);
+        String uniqueUrl;
+
+        do {
+            uniqueUrl = groupIdUrlSafe + generateRandomAlphanumericString(4);
+        } while (urlExistsInDatabase(uniqueUrl));
+
+        return uniqueUrl;
+    }
+
+    private String generateRandomAlphanumericString(int length) {
+        StringBuilder sb = new StringBuilder(length);
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for (int i = 0; i < length; i++) {
+            int index = (int) (Math.random() * characters.length());
+            sb.append(characters.charAt(index));
+        }
+
+        return sb.toString();
+    }
+
+
+    private String encryptGroupName(String groupName) {
+       Random random = new Random();
+       StringBuilder encryptedGroupName = new StringBuilder();
+       for (char c : groupName.toCharArray()) {
+           int newChar = random.nextInt(62);
+           if (newChar < 10) {
+               encryptedGroupName.append(newChar);
+           } else if (newChar < 36) {
+               encryptedGroupName.append((char) ('a' + newChar - 10));
+           } else {
+               encryptedGroupName.append((char) ('A' + newChar - 36));
+           }
+       }
+       return encryptedGroupName.toString();
+    }
+
+    private String mixUrlParts(String encryptedInvitationName, String uniqueIdentifier, String groupId) {
+        encryptedInvitationName = shuffleText(encryptedInvitationName);
+        uniqueIdentifier = shuffleText(uniqueIdentifier);
+        groupId = shuffleText(groupId);
+
+        List<String> parts = new ArrayList<>(Arrays.asList(encryptedInvitationName, uniqueIdentifier, groupId));
+        Collections.shuffle(parts);
+        return String.join("", parts);
+    }
+
+    private String shuffleText(String text) {
+        List<String> parts = new ArrayList<>(Arrays.asList(text.split("")));
+        Collections.shuffle(parts);
+        return String.join("", parts);
+    }
+
+    private boolean isUrlValid(String url) {
+        boolean hasUpperCase = !url.equals(url.toLowerCase());
+        boolean hasLowerCase = !url.equals(url.toUpperCase());
+        boolean hasDigit = url.chars().anyMatch(Character::isDigit);
+        return hasUpperCase && hasLowerCase && hasDigit;
+    }
+
+    private boolean urlExistsInDatabase(String url) {
+        return invitationRepository.findByGroupUrl(url).isPresent();
+    }
     /**
      * Old services related to the invitation
      */
