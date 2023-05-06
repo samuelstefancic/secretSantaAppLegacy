@@ -23,10 +23,12 @@ public class InvitationMapperTest {
 
     @Autowired
     private final UserRepository userRepository;
+    private final InvitationMapper invitationMapper;
 
     @Autowired
-    public InvitationMapperTest(UserRepository userRepository) {
+    public InvitationMapperTest(UserRepository userRepository, InvitationMapper invitationMapper) {
         this.userRepository = userRepository;
+        this.invitationMapper = invitationMapper;
     }
 
     @Test
@@ -57,7 +59,7 @@ public class InvitationMapperTest {
         invitation.setInvitedUser(invitedUser1);
         invitation.setSender(invitedUser2);
 
-        InvitationDTO invitationDTO = InvitationMapper.toInvitationDTO(invitation);
+        InvitationDTO invitationDTO = invitationMapper.toInvitationDTO(invitation);
 
         assertEquals(invitation.getId(), invitationDTO.getId());
         assertEquals(invitation.getEmail(), invitationDTO.getEmail());

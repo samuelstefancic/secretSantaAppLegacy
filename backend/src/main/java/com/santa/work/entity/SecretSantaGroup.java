@@ -2,23 +2,22 @@ package com.santa.work.entity;
 
 import com.santa.work.enumeration.InvitationStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.apache.catalina.User;
+import lombok.*;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.collection.spi.PersistentBag;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Table(name = "santa_group")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(exclude = {"admin", "members", "invitations", "matches"})
+@RequiredArgsConstructor
 @AllArgsConstructor
-@NoArgsConstructor
 public class SecretSantaGroup {
 
     @Id
@@ -36,6 +35,7 @@ public class SecretSantaGroup {
 
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name = "admin_id")
+    @ToString.Exclude
     private Users admin;
 
     @Column(name = "group_url", unique = true)
@@ -51,14 +51,17 @@ public class SecretSantaGroup {
             joinColumns = @JoinColumn(name = "group_id"),
             inverseJoinColumns = @JoinColumn(name = "member_id")
     )
+    @ToString.Exclude
     private List<Users> members;
 
     //List invitation groupe secretsanta, invitation liée à un groupe
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
     private List<Invitation> invitations = new ArrayList<>();
 
     //Liste de correspondance pour membre de chaque groupe, match associé à un groupe santa spécifique
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
     private List<Match> matches = new ArrayList<>();
 
     public List<Users> getMembers() {
@@ -87,4 +90,6 @@ public class SecretSantaGroup {
         this.members.add(user);
         user.getGroups().add(this);
     }
+
+
 }

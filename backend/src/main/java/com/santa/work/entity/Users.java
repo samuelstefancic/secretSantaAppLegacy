@@ -5,10 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -16,7 +13,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = {"groups", "invitations"})
 public class Users {
 
     @Id
@@ -54,8 +51,8 @@ public class Users {
     @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<SecretSantaGroup> groups;
 
-    @OneToMany(mappedBy = "invitedUser")
-    private Set<Invitation> invitations;
+    @OneToMany(mappedBy = "invitedUser", fetch = FetchType.LAZY)
+    private Set<Invitation> invitations = new HashSet<>();
 
     public List<SecretSantaGroup> getGroups() {
         if (groups == null) {
@@ -63,4 +60,5 @@ public class Users {
         }
         return groups;
     }
+
 }

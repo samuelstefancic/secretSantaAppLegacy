@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -14,7 +15,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = {"group", "invitedUser", "sender"})
 public class Invitation {
 
     @Id
@@ -57,4 +58,5 @@ public class Invitation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_invitation_user_id")
     private Users sender;
+
 }

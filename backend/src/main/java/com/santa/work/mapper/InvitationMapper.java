@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class InvitationMapper {
-    public static InvitationDTO toInvitationDTO(Invitation invitation) {
+    public InvitationDTO toInvitationDTO(Invitation invitation) {
         if (invitation == null) {
             return null;
         }
@@ -34,11 +34,12 @@ public class InvitationMapper {
         System.out.println("InvitationMapper.toInvitationDTO: groupUrl = " + groupUrl);
         return new InvitationDTO(id, invitationName, email, token,groupUrl, invitationStatus, expiryDate, groupId, invitedUserId, senderId);
     }
-    public static Set<InvitationDTO> toInvitationDTOs(Set<Invitation> invitations) {
+    public Set<InvitationDTO> toInvitationDTOs(Set<Invitation> invitations) {
         if (invitations == null) {
             return Collections.emptySet();
         }
-        return invitations.stream().map(InvitationMapper::toInvitationDTO).collect(Collectors.toSet());
+        Set <InvitationDTO> invitationDTOs = invitations.stream().map(this::toInvitationDTO).collect(Collectors.toSet());
+        return invitationDTOs;
     }
     public Invitation toInvitationEntity(InvitationDTO invitationDTO) {
         if (invitationDTO == null) {

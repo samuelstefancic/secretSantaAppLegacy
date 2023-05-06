@@ -37,16 +37,10 @@ public class UserMapper implements UserMapperDelegate {
         if (user.getLogin() == null || user.getPassword() == null) {
             throw new InvalidUserException("User login or pasword is null");
         }
-        //Add
-       /* UUID id = user.getId();
-        Role role = user.getRole();
-        String firstname = user.getFirstname();
-        String lastname = user.getLastname();
-        String login = user.getLogin();
-        String password = user.getPassword();*/
         List<WishDTO> wishList = wishMapper.toWishDtos(user.getWishList());
         List<UUID> groupIds = secretSantaGroupMapper.toUUIDs(user.getGroups());
-        Set<InvitationDTO> invitations = InvitationMapper.toInvitationDTOs(user.getInvitations());
+        Set<InvitationDTO> invitations = invitationMapper.toInvitationDTOs(user.getInvitations());
+        System.out.println("User Invitations count: " + user.getInvitations().size());
         return new UserDTO(user.getId(), user.getRole(), user.getFirstname(), user.getLastname(), user.getLogin(), user.getPassword(), user.getEmail(), wishList, groupIds, invitations);
     }
     public Users toUserEntity(UserDTO userDTO) {

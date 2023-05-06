@@ -78,6 +78,7 @@ public class InvitationServiceImpl implements InvitationService{
 
         // Save the invitation
         try {
+            invitedUser.setInvitations(Collections.singleton(invitation));
             Invitation createdInvitation = invitationRepository.save(invitation);
             if (createdInvitation.getId() == null) {
                 throw new InvitationException("Failed to create Invitation: invitation id " + invitation.getId() + " is null", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -255,6 +256,10 @@ public class InvitationServiceImpl implements InvitationService{
 
     private boolean urlExistsInDatabase(String url) {
         return invitationRepository.findByGroupUrl(url).isPresent();
+    }
+
+    private boolean isUserAlreadyInGroup(Users user, SecretSantaGroup group) {
+        return group.getMembers().contains(user);
     }
     /**
      * Old services related to the invitation

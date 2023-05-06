@@ -32,7 +32,7 @@ public class InvitationController {
     @PostMapping("/{groupId}/{senderId}")
     public ResponseEntity<InvitationDTO> createInvitation(@RequestBody InvitationDTO invitationDTO, @PathVariable UUID groupId, @PathVariable UUID senderId) {
         Invitation invitation = invitationService.createInvitation(invitationDTO, groupId, senderId);
-        System.out.println(invitation.getGroupUrl());
+        System.out.println(invitation.getGroupUrl() + invitation.getInvitationName());
         return new ResponseEntity<>(invitationMapper.toInvitationDTO(invitation), HttpStatus.CREATED);
     }
 
@@ -56,7 +56,7 @@ public class InvitationController {
     public ResponseEntity<InvitationDTO> updateInvitation(@RequestBody InvitationDTO updatedInvitationDTO, @PathVariable UUID invitationId) {
         Invitation updatedInvitation = invitationMapper.toInvitationEntity(updatedInvitationDTO);
         Invitation invitation = invitationService.updateInvitation(updatedInvitation, invitationId);
-        return new ResponseEntity<>(InvitationMapper.toInvitationDTO(invitation), HttpStatus.OK);
+        return new ResponseEntity<>(invitationMapper.toInvitationDTO(invitation), HttpStatus.OK);
     }
 
     @Operation(summary = "Delete an invitation")
