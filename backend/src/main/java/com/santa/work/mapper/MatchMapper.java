@@ -19,7 +19,7 @@ public class MatchMapper {
         if (match == null) {
             throw new MatchNotFoundException("Match not found");
         }
-        return new MatchDTO(match.getId(), match.getReceiverUser().getId(), match.getReceiverUser().getFirstname(),
+        return new MatchDTO(match.getId(),match.getGroup().getName(), match.getReceiverUser().getId(), match.getReceiverUser().getFirstname(),
                 match.getReceiverUser().getLastname());
     }
     public static Match toMatchEntity(MatchDTO matchDTO, Users giverUser, Users receiverUser, SecretSantaGroup group) {

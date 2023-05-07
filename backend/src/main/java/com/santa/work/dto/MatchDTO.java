@@ -12,6 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class MatchDTO {
     private UUID id;
+    private String groupName;
     private UUID receiverUserId;
     private String receiverFirstName;
     private String receiverLastName;
