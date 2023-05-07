@@ -1,8 +1,9 @@
 
-# My SecretSantaApp - Desktop
+# My SecretSantaApp - Desktop - Legacy -
 
-This is an application dedicated to the huge SecretSanta in my Family, but i switched it to make a fullstack application, the final project will also be a mobile app Android based (at first)
 
+This is an application dedicated to the huge SecretSanta in my Family, but i switched it to make a fullstack application.
+You can pull this project as much as you want but be careful, the structure is yet to be optimized, there is no security, no clean code, no refactoring, just plain blank code that is yet to be optimized
 
 
 ## Authors
