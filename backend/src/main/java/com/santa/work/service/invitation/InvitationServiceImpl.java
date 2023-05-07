@@ -52,9 +52,13 @@ public class InvitationServiceImpl implements InvitationService{
         if (isUserInGroup(invitedUser, group)) {
             throw new InvitationException("User with email " + invitedUser.getEmail() + " is already in the group", HttpStatus.BAD_REQUEST);
         }
+        if (hasUserAlreadyReceivedInvitationForGroup(invitedUser, groupId)) {
+            throw new InvitationException("User with email " + invitedUser.getEmail() + " has already received an invitation for this group", HttpStatus.BAD_REQUEST);
+        }
         if (!canSendInvitation(group)) {
             throw new InvitationException("Group with id " + groupId + " has reached the maximum number of invitations", HttpStatus.BAD_REQUEST);
         }
+
         String groupUrl = generateUniqueGroupUrl(groupId);
         invitationDTO.setGroupUrl(groupUrl);
 
@@ -141,9 +145,13 @@ public class InvitationServiceImpl implements InvitationService{
         if (isInvitationExpired(invitation)) {
             throw new InvitationException("Cannot accept an invitation that has expired", HttpStatus.BAD_REQUEST);
         }
-        invitation.setStatus(InvitationStatus.ACCEPTED);
         SecretSantaGroup group = invitation.getGroup();
         Users invitedUser = invitation.getInvitedUser();
+
+        if (isUserAlreadyInGroup(invitedUser, group)) {
+            throw new InvitationException("User with email " + invitedUser.getEmail() + " is already in the group", HttpStatus.BAD_REQUEST);
+        }
+        invitation.setStatus(InvitationStatus.ACCEPTED);
         group.getMembers().add(invitedUser);
         secretSantaGroupRepository.save(group);
         return invitationRepository.save(invitation);
@@ -178,6 +186,10 @@ public class InvitationServiceImpl implements InvitationService{
     public List<Invitation> getAllInvitationsByIds(List<UUID> invitationsIds) {return invitationRepository.findAllById(invitationsIds);}
 
     private boolean isUserInGroup(Users user, SecretSantaGroup group) {
+        return group.getMembers().contains(user);
+    }
+
+    private boolean isUserAlreadyInGroup(Users user, SecretSantaGroup group) {
         return group.getMembers().contains(user);
     }
 
@@ -258,39 +270,7 @@ public class InvitationServiceImpl implements InvitationService{
         return invitationRepository.findByGroupUrl(url).isPresent();
     }
 
-    private boolean isUserAlreadyInGroup(Users user, SecretSantaGroup group) {
-        return group.getMembers().contains(user);
+    private boolean hasUserAlreadyReceivedInvitationForGroup(Users user, UUID groupId) {
+        return user.getInvitations().stream().anyMatch(invitation -> invitation.getGroup().getId().equals(groupId));
     }
-    /**
-     * Old services related to the invitation
-     */
-
-    /*
-
-    public Invitation createInvitation(Invitation invitation) {
-        try {
-            // Check if the group and invited user exist
-            UUID groupId = invitation.getGroup().getId();
-            UUID invitedUserId = invitation.getInvitedUser().getId();
-            if (!invitationRepository.existsById(groupId) || !invitationRepository.existsById(invitedUserId)) {
-                throw new InvitationException("Group or invited user not found", HttpStatus.NOT_FOUND);
-            }
-            invitation.setStatus(InvitationStatus.PENDING);
-            invitation.setExpiryDate(LocalDateTime.now().plusDays(30));
-            String token = generateUniqueToken();
-            if (token == null || token.isEmpty()) {
-                throw new InvitationException("Failed to generate token for the invitation", HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-            invitation.setToken(token);
-            Invitation createdInvitation = invitationRepository.save(invitation);
-            if (createdInvitation.getId() == null) {
-                throw new InvitationException("failed to create Invitation : invitation id " + invitation.getId() + " is null", HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-            return createdInvitation;
-        } catch (DataAccessException | ConstraintViolationException e) {
-            throw new InvitationException("failed to create Invitation : " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-*/
-
 }
